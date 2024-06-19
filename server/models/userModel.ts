@@ -65,17 +65,17 @@ userSchema.methods.generateAuthToken = function () {
 export const User = mongoose.model('User', userSchema)
 
 export const validateUser = (user: ValidateUserProps) => {
-  const schema = object({
+  const schema = Joi.object({
     password: Joi.string()
       .min(8)
-      .required()
-      .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])"))
-      .messages({
-        "string.empty": "Password is required",
-        "string.min": "Password must be at least {#limit} characters long",
-        "string.pattern.base":
-          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*)",
-      }),
+      .required(),
+      // .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])"))
+      // .messages({
+      //   "string.empty": "Password is required",
+      //   "string.min": "Password must be at least {#limit} characters long",
+      //   "string.pattern.base":
+      //     "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*)",
+      // }),
       indexNumber: Joi.string().required().length(10)
   })
   return schema.validate(user)
