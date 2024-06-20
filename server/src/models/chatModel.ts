@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import type { IChat } from "../types";
+import type { IChat } from "../types/types";
 
 const chatSchema = new Schema<IChat>({
     members: [{type: Schema.Types.ObjectId, ref: 'User'} ],

@@ -3,7 +3,7 @@ import User, { validateUser } from "../models/userModel";
 import bcrypt from "bcrypt";
 import { logger } from "../startup/logger";
 import jwt from "jsonwebtoken";
-import { TokenPayload } from "../types";
+import { TokenPayload } from "../types/types";
 import { createTransport } from "nodemailer";
 import "dotenv/config";
 import { validatePassword } from "../helpers/validation";
@@ -97,7 +97,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     await transporter.sendMail(mailOptions);
     res.status(200).send({ message: "Email sent successfully" });
   } catch (error) {
-    logger.error(error);
+    logger.error((error as Error).message);
     res.status(500).send({ error: "Failed to process password reset request" });
   }
 };
@@ -118,7 +118,7 @@ export const resetPasswordGet = async (req: Request, res: Response) => {
       status: "not verified",
     });
   } catch (error) {
-    logger.error(error);
+    logger.error((error as Error).message);
     res.status(400).send({ error: "Invalid token or user not found" });
   }
 };
@@ -162,7 +162,7 @@ export const resetPasswordPost = async (req: Request, res: Response) => {
       status: "verified",
     });
   } catch (error) {
-    logger.error(error);
+    logger.error((error as Error).message);
     res.status(400).send({ error: "Failed to update password" });
   }
 };

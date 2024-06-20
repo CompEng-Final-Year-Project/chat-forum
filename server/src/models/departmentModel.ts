@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { IDepartment } from "../types";
+import { IDepartment } from "../types/types";
 
 const departmentSchema = new Schema<IDepartment>({
     name: {

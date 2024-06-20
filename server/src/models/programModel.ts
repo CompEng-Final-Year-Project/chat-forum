@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { IProgram } from "../types";
+import { IProgram } from "../types/types";
 
 const programSchema = new Schema<IProgram>({
   name: { type: String, required: true, unique: true },

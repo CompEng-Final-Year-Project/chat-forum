@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 import Joi from "joi";
-import type { IUser, ValidateUserProps } from "../types";
+import type { IUser, ValidateUserProps } from "../types/types";
 
 const userSchema = new Schema<IUser>({
   firstName: {

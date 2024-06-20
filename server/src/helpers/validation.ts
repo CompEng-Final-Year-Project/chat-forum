@@ -1,5 +1,5 @@
 import Joi from "joi"
-import { ValidatePasswordProps } from "../types"
+import { ValidatePasswordProps } from "../types/types"
 
 export const validatePassword = (data: ValidatePasswordProps) => {
     const schema = Joi.object({
