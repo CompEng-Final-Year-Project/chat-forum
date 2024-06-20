@@ -1,8 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
-import Joi, { object } from "joi";
-import { IUser, ValidateUserProps } from "../types";
+import Joi from "joi";
+import type { IUser, ValidateUserProps } from "../types";
 
 const userSchema = new Schema<IUser>({
   firstName: {
@@ -49,6 +49,11 @@ const userSchema = new Schema<IUser>({
     ref: "Department",
     required: true,
   },
+  courses: {
+    type: Schema.Types.ObjectId,
+    ref: "Course",
+    required: true,
+  },
 });
 
 const jwtPrivateKey = process.env.JWTPrivateKey;
@@ -58,25 +63,17 @@ if (!jwtPrivateKey) {
 }
 
 userSchema.methods.generateAuthToken = function () {
-  const token = jwt.sign({ _id: this._id, role: this.role }, jwtPrivateKey);
-  return token;
+  return jwt.sign({ _id: this._id, role: this.role }, jwtPrivateKey);
 };
 
-export const User = mongoose.model('User', userSchema)
+const User = mongoose.model<IUser>("User", userSchema);
+
+export default User;
 
 export const validateUser = (user: ValidateUserProps) => {
   const schema = Joi.object({
-    password: Joi.string()
-      .min(8)
-      .required(),
-      // .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])"))
-      // .messages({
-      //   "string.empty": "Password is required",
-      //   "string.min": "Password must be at least {#limit} characters long",
-      //   "string.pattern.base":
-      //     "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*)",
-      // }),
-      indexNumber: Joi.string().required().length(10)
-  })
-  return schema.validate(user)
+    password: Joi.string().min(8).required(),
+    indexNumber: Joi.string().required().length(10),
+  });
+  return schema.validate(user);
 };

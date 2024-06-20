@@ -3,12 +3,18 @@ import { logger } from './logger'
 import 'dotenv/config'
 
 
-const mongoDBUri = process.env.MONGODB_URI
+const db = process.env.MONGODB_URI
 
-if(!mongoDBUri) {
+if(!db) {
     throw new Error('MONGODB_URI environment variable is not set')
 }
 
-export const connectDB = () => {
-    mongoose.connect(mongoDBUri).then(() => logger.info(`connected to ${mongoDBUri}...`))
-}
+export const connectDB = async () => {
+    try {
+      await mongoose.connect(db);
+      logger.info("Connected to MongoDB...");
+    } catch (error) {
+      logger.error((error as Error).message);
+      process.exit(1);
+    }
+  };

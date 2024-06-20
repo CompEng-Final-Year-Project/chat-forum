@@ -1,27 +1,36 @@
 import { Request, Response } from "express";
-import { User, validateUser } from "../models/userModel";
+import User, { validateUser } from "../models/userModel";
 import bcrypt from "bcrypt";
 import { logger } from "../startup/logger";
 import jwt from "jsonwebtoken";
 import { TokenPayload } from "../types";
-import { createTransport } from 'nodemailer'
-import 'dotenv/config'
+import { createTransport } from "nodemailer";
+import "dotenv/config";
 import { validatePassword } from "../helpers/validation";
 
 export const login = async (req: Request, res: Response) => {
   try {
     const { error } = validateUser(req.body);
-    if (error) return res.status(400).send({error: error.details[0].message});
+    if (error) {
+      return res.status(400).send({ error: error.details[0].message });
+    }
 
     const user = await User.findOne({ indexNumber: req.body.indexNumber });
-    if (!user) return res.status(400).send({error: "Invalid index number or password"});
+    if (!user) {
+      return res
+        .status(400)
+        .send({ error: "Invalid index number or password" });
+    }
 
     const validPassword = await bcrypt.compare(
       req.body.password,
       user.password
     );
-    if (!validPassword)
-      return res.status(400).send({error: "Invalid index number or password"});
+    if (!validPassword) {
+      return res
+        .status(400)
+        .send({ error: "Invalid index number or password" });
+    }
 
     const token = user.generateAuthToken();
     res.cookie("token", token, {
@@ -39,20 +48,25 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { indexNumber } = req.body;
     const user = await User.findOne({ indexNumber });
-    if (!user) return res.status(400).send({error: "Index number does not exist"});
+    if (!user) {
+      return res.status(400).send({ error: "Index number does not exist" });
+    }
 
     const secret = process.env.JWTPrivateKey + user.password;
-    const token = jwt.sign({ indexNumber: user.indexNumber, id: user._id }, secret, {
-      expiresIn: "5m",
-    });
+    const token = jwt.sign(
+      { indexNumber: user.indexNumber, id: user._id },
+      secret,
+      {
+        expiresIn: "5m",
+      }
+    );
 
     const link = `http://${req.headers.host}/api/auth/reset-password/${user._id}/${token}`;
-    
+
     const transporter = createTransport({
       service: "gmail",
       host: "smtp.gmail.com",
@@ -60,12 +74,12 @@ export const forgotPassword = async (req: Request, res: Response) => {
       secure: false,
       auth: {
         user: process.env.EMAIL!,
-        pass: process.env.APP_Password!
+        pass: process.env.APP_Password!,
       },
       tls: {
-        rejectUnauthorized: false
-    },
-    })
+        rejectUnauthorized: false,
+      },
+    });
 
     const mailOptions = {
       from: process.env.EMAIL!,
@@ -77,50 +91,58 @@ export const forgotPassword = async (req: Request, res: Response) => {
       <a href="${link}">Reset Password</a>
       <p>This link will expire in 5 minutes for security reasons. If you didn't request this password reset, you can safely ignore this email.</p>
       <p>Thank you,<br>UENR Team</p>
-    `
-    }
+    `,
+    };
 
-   await transporter.sendMail(mailOptions)
-   res.status(200).send({message: "Email sent successfully"})
-
+    await transporter.sendMail(mailOptions);
+    res.status(200).send({ message: "Email sent successfully" });
   } catch (error) {
     logger.error(error);
-    res.status(500).send({error: "Failed to process password reset request"});
+    res.status(500).send({ error: "Failed to process password reset request" });
   }
 };
-
 
 export const resetPasswordGet = async (req: Request, res: Response) => {
   const { id, token } = req.params;
   const user = await User.findOne({ _id: id });
-  if (!user) return res.status(400).send({ error: "No user found" });
+  if (!user) {
+    return res.status(400).send({ error: "No user found" });
+  }
 
   const secret = process.env.JWTPrivateKey! + user.password;
   try {
     const verify = jwt.verify(token, secret) as TokenPayload;
 
-    res.render("index", { indexNumber: verify.indexNumber, status: "not verified"});
+    res.render("index", {
+      indexNumber: verify.indexNumber,
+      status: "not verified",
+    });
   } catch (error) {
     logger.error(error);
     res.status(400).send({ error: "Invalid token or user not found" });
   }
 };
 
-
 export const resetPasswordPost = async (req: Request, res: Response) => {
   try {
     const { error } = validatePassword(req.body);
-    if (error) return res.status(400).send({error: error.details[0].message});
+    if (error) {
+      return res.status(400).send({ error: error.details[0].message });
+    }
 
     const { id, token } = req.params;
     const { password } = req.body;
 
     const user = await User.findOne({ _id: id });
-    if (!user) return res.status(400).send({ error: "No user found" });
+    if (!user) {
+      return res.status(400).send({ error: "No user found" });
+    }
 
     const secret = process.env.JWTPrivateKey! + user.password;
     const verify = jwt.verify(token, secret) as TokenPayload;
-    if (!verify) return res.status(400).send({ error: "Token not verified" });
+    if (!verify) {
+      return res.status(400).send({ error: "Token not verified" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await User.updateOne(
@@ -135,7 +157,10 @@ export const resetPasswordPost = async (req: Request, res: Response) => {
     );
 
     res.status(200).send({ message: "Password updated" });
-    res.render("index", { indexNumber: verify.indexNumber, status: "verified" });
+    res.render("index", {
+      indexNumber: verify.indexNumber,
+      status: "verified",
+    });
   } catch (error) {
     logger.error(error);
     res.status(400).send({ error: "Failed to update password" });
