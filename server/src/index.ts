@@ -6,7 +6,7 @@ import express from "express";
 import 'dotenv/config'
 
 const app = express();
-app.set("view engine", "ejs")
+// app.set("view engine", "ejs")
 
 logger
 routes(app)

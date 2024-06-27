@@ -34,7 +34,7 @@ export const login = async (req: Request, res: Response) => {
 
     const token = user.generateAuthToken();
     res.cookie("token", token, {
-      httpOnly: true,
+      // httpOnly: true,
       secure: true,
       sameSite: "strict",
     });
@@ -65,7 +65,9 @@ export const forgotPassword = async (req: Request, res: Response) => {
       }
     );
 
-    const link = `http://${req.headers.host}/api/auth/reset-password/${user._id}/${token}`;
+    const link = `${process.env.FRONTEND_URL!}/auth/reset-password/${
+      user._id
+    }/${token}`;
 
     const transporter = createTransport({
       service: "gmail",
@@ -104,6 +106,9 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
 export const resetPasswordGet = async (req: Request, res: Response) => {
   const { id, token } = req.params;
+  if (!id || !token) {
+    return res.status(400).send({ error: "Invalid token or id" });
+  }
   const user = await User.findOne({ _id: id });
   if (!user) {
     return res.status(400).send({ error: "No user found" });
@@ -113,7 +118,7 @@ export const resetPasswordGet = async (req: Request, res: Response) => {
   try {
     const verify = jwt.verify(token, secret) as TokenPayload;
 
-    res.render("index", {
+    res.send({
       indexNumber: verify.indexNumber,
       status: "not verified",
     });
@@ -131,6 +136,9 @@ export const resetPasswordPost = async (req: Request, res: Response) => {
     }
 
     const { id, token } = req.params;
+    if (!id || !token) {
+      return res.status(400).send({ error: "Invalid token or id" });
+    }
     const { password } = req.body;
 
     const user = await User.findOne({ _id: id });
@@ -156,10 +164,8 @@ export const resetPasswordPost = async (req: Request, res: Response) => {
       }
     );
 
-    res.status(200).send({ message: "Password updated" });
-    res.render("index", {
-      indexNumber: verify.indexNumber,
-      status: "verified",
+    res.status(200).send({
+      message: "Password updated",
     });
   } catch (error) {
     logger.error((error as Error).message);

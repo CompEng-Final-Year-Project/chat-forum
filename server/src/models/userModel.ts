@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import "dotenv/config";
 import Joi from "joi";
 import type { IUser, ValidateUserProps } from "../types/types";
+import _ from "lodash";
 
 const userSchema = new Schema<IUser>({
   firstName: {
@@ -63,7 +64,17 @@ if (!jwtPrivateKey) {
 }
 
 userSchema.methods.generateAuthToken = function () {
-  return jwt.sign({ _id: this._id, role: this.role }, jwtPrivateKey);
+  const payload = _.pick(this.toObject(), [
+    "_id",
+    "role",
+    "firstName",
+    "lastName",
+    "email",
+    "indexNumber",
+    "department",
+    "courses",
+  ]);
+  return jwt.sign(payload, jwtPrivateKey);
 };
 
 const User = mongoose.model<IUser>("User", userSchema);
