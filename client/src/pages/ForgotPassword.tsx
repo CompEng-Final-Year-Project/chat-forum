@@ -11,6 +11,7 @@ import { baseUrl, postRequest } from "@/utils/services";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import EmailSuccess from "@/components/EmailSuccess";
+import { Spinner } from "@/components/spinner";
 
 const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
@@ -114,7 +115,7 @@ const ForgotPassword = () => {
                 </div>
                 <div>
                   <Button type="submit" disabled={loading} className="w-full">
-                    {loading ? "Sending..." : "Send Email"}
+                  {loading ? <Spinner className="text-white" /> : "Send Email"}
                   </Button>
                   <Link
                     className="hover:cursor hover:underline block text-center mt-4 text-muted-foreground text-sm"

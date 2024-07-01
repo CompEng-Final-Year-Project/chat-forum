@@ -21,4 +21,6 @@ export interface UserProps {
 export interface AuthContextProps {
   user: UserProps | null;
   setUser: Dispatch<SetStateAction<UserProps | null>>;
+  login: (url: string, body: BodyInit) => Promise<{message: string, error: boolean}>
+  logout: () => Promise<{message: string, error: boolean}>
 }

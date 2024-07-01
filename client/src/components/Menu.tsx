@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Link, useLocation } from "react-router-dom";
 import { CollapseMenuButton } from "./CollapseMenuButton";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MenuProps {
   isOpen: boolean | undefined;
@@ -20,6 +21,7 @@ interface MenuProps {
 export function Menu({ isOpen }: MenuProps) {
   const {pathname} = useLocation();
   const menuList = getMenuList(pathname);
+  const {logout} = useAuth()
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">
@@ -106,7 +108,7 @@ export function Menu({ isOpen }: MenuProps) {
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={() => {}}
+                    onClick={() => {logout()}}
                     variant="outline"
                     className="w-full justify-center h-10 mt-5"
                   >

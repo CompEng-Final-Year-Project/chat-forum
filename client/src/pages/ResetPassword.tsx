@@ -9,6 +9,7 @@ import UenrLogo from "../assets/uenrLogo.svg";
 import { baseUrl, getRequest, postRequest } from "@/utils/services";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Spinner } from "@/components/spinner";
 
 interface Props {
   password: string;
@@ -86,6 +87,7 @@ const ResetPassword = () => {
 
   const onSubmit: SubmitHandler<Props> = async (data) => {
     try {
+      setLoading(true)
       const response = await postRequest(
         `${baseUrl}/auth/reset-password/${id}/${token}`,
         JSON.stringify({password: data.password})
@@ -111,6 +113,8 @@ const ResetPassword = () => {
         variant: "destructive",
       });
       return;
+    }finally{
+      setLoading(false)
     }
   };
   return (
@@ -177,7 +181,7 @@ const ResetPassword = () => {
           </div>
           <div>
             <Button type="submit" className="w-full">
-              Reset Password
+            {loading ? <Spinner className="text-white" /> : "Reset Password"}
             </Button>
           </div>
         </form>

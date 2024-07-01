@@ -1,22 +1,23 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import UenrLogo from "../assets/uenrLogo.svg";
 import { z, ZodType } from "zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoginProps, UserProps } from "@/types";
-import { baseUrl, postRequest } from "@/utils/services";
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
-import { useContext } from "react";
-import { AuthContext } from "@/contexts/AuthContext";
+import { LoginProps } from "@/types";
+import { baseUrl } from "@/utils/services";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
+import { Spinner } from "@/components/spinner";
+import { useState } from "react";
 
 const SignIn = () => {
-  const {setUser} = useContext(AuthContext)
-  const {toast} = useToast()
+  const { login } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const schema: ZodType<LoginProps> = z.object({
     indexNumber: z
       .string()
@@ -39,26 +40,36 @@ const SignIn = () => {
 
   const onSubmit: SubmitHandler<LoginProps> = async (data) => {
     try {
-      const response = await postRequest(
+      setLoading(true);
+      const response = await login(
         `${baseUrl}/auth/login`,
         JSON.stringify(data)
       );
-      const token = Cookies.get("token");
-      if(response.error){
-        toast({description: response.message, variant: response.error && "destructive"})
-        return
+      if (response.error) {
+        toast({
+          description: response.message,
+          variant: response.error && "destructive",
+        });
+        return;
       }
-      toast({description: response.message,  color: 'green', duration: 2000, style: {color: 'green'}})
-      if(token){
-        const decoded = jwtDecode(token)
-        sessionStorage.setItem('user', JSON.stringify(decoded))
-        setUser(decoded as UserProps)
-      }
+      toast({
+        description: response.message,
+        color: "green",
+        duration: 2000,
+        style: { color: "green" },
+      });
+      navigate("/general-feed");
     } catch (error) {
-      toast({description: "Something went wrong, try again", variant: "destructive"})
+      toast({
+        description: "Something went wrong, try again",
+        variant: "destructive",
+      });
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
@@ -146,7 +157,7 @@ const SignIn = () => {
           </div>
           <div>
             <Button type="submit" className="w-full">
-              Sign in
+              {loading ? <Spinner className="text-white" /> : "Sign in"}
             </Button>
           </div>
         </form>
