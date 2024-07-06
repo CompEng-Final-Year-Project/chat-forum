@@ -1,3 +1,4 @@
+import CreatePostCard from "@/components/CreatePostCard";
 import NewPost from "@/components/NewPostBox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ const Dashboard = () => {
   return (
     <div className="flex-1 p-4 bg-muted/10">
       <div className="mb-10 max-w-2xl mx-auto">
+        <CreatePostCard />
         <NewPost />
       </div>
       <div className="max-w-2xl mx-auto">

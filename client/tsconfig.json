@@ -27,6 +27,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "public/recorder-worklet-processor.js"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
