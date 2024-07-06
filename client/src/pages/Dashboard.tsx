@@ -8,15 +8,21 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { useState } from "react";
 import { FaRegThumbsUp } from "react-icons/fa";
 import { FiMessageCircle, FiShare } from "react-icons/fi";
 
 const Dashboard = () => {
+  const [showCard, setShowCard] = useState(false);
+  const [extra, setExtra] = useState<"Photo" | "Document" | "Audio" | null>(
+    null
+  );
+
   return (
     <div className="flex-1 p-4 bg-muted/10">
       <div className="mb-10 max-w-2xl mx-auto">
-        <CreatePostCard />
-        <NewPost />
+        {showCard && <CreatePostCard setShowCard={setShowCard} extra={extra} setExtra={setExtra} />}
+        <NewPost setShowCard={setShowCard} setExtra={setExtra} />
       </div>
       <div className="max-w-2xl mx-auto">
         <div className="mb-4">
@@ -56,13 +62,13 @@ const Dashboard = () => {
                   <span className="sr-only">Like</span>
                 </Button>
                 <Button variant="ghost" size="icon">
-                <span className="w-5 h-5 flex justify-center items-center">
+                  <span className="w-5 h-5 flex justify-center items-center">
                     <FiMessageCircle />
                   </span>
                   <span className="sr-only">Comment</span>
                 </Button>
                 <Button variant="ghost" size="icon" className="">
-                <span className="w-5 h-5 flex justify-center items-center ">
+                  <span className="w-5 h-5 flex justify-center items-center ">
                     <FiShare />
                   </span>
                   <span className="sr-only">Share</span>

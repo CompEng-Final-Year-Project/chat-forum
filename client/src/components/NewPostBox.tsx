@@ -3,8 +3,15 @@ import { Card } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { FaFileAlt, FaPhotoVideo } from "react-icons/fa";
 import { AiFillAudio } from "react-icons/ai";
+import { Dispatch, SetStateAction } from "react";
 
-const NewPost = () => {
+const NewPost = ({
+  setShowCard,
+  setExtra,
+}: {
+  setShowCard: Dispatch<SetStateAction<boolean>>;
+  setExtra: Dispatch<SetStateAction<"Photo" | "Document" | "Audio" | null>>;
+}) => {
   return (
     <Card className=" w-full p-[20px] shadow-lg">
       <div className="flex space-x-2">
@@ -15,7 +22,10 @@ const NewPost = () => {
           </Avatar>
         </span>
 
-        <span className="w-full border-none focus:ring-0 hover:cursor-pointer bg-gray-100 flex items-center rounded-full">
+        <span
+          onClick={() => setShowCard(true)}
+          className="w-full border-none focus:ring-0 hover:cursor-pointer bg-gray-100 flex items-center rounded-full"
+        >
           <span className="ms-4 text-sm text-gray-700">
             What's on your mind?
           </span>
@@ -23,23 +33,44 @@ const NewPost = () => {
       </div>
       <hr className="my-2" />
       <div className="w-full flex justify-center gap-6">
-        <Button variant="ghost" className="flex gap-2">
+        <Button
+          onClick={() => {
+            setShowCard(true);
+            setExtra("Photo");
+          }}
+          variant="ghost"
+          className="flex gap-2"
+        >
           <span className="text-green-600 text-xl">
             <FaPhotoVideo />
           </span>
-          Photo/video
+          <span className="max-sm:hidden">Photo/video</span>
         </Button>
-        <Button variant="ghost" className="flex gap-2">
+        <Button
+          onClick={() => {
+            setShowCard(true);
+            setExtra("Audio");
+          }}
+          variant="ghost"
+          className="flex gap-2"
+        >
           <span className="text-green-600 text-xl">
             <AiFillAudio />
           </span>
-          Audio
+          <span className="max-sm:hidden">Audio</span>
         </Button>
-        <Button variant="ghost" className="flex gap-2">
+        <Button
+          onClick={() => {
+            setShowCard(true);
+            setExtra("Document");
+          }}
+          variant="ghost"
+          className="flex gap-2"
+        >
           <span className="text-green-600 text-xl">
             <FaFileAlt />
           </span>
-          Document
+          <span className="max-sm:hidden">Document</span>
         </Button>
       </div>
     </Card>
