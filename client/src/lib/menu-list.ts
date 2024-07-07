@@ -1,7 +1,5 @@
-import {
-  Inbox,
-  LucideIcon
-} from "lucide-react";
+import { UserProps } from "@/types";
+import { Inbox, LucideIcon } from "lucide-react";
 import { FaHashtag, FaPaperPlane, FaUser, FaUsers } from "react-icons/fa";
 import { IconType } from "react-icons/lib";
 
@@ -11,7 +9,7 @@ type Submenu = {
   href: string;
   label: string;
   active: boolean;
-  icon: Icon
+  icon: Icon;
 };
 
 type Menu = {
@@ -27,7 +25,7 @@ type Group = {
   menus: Menu[];
 };
 
-export function getMenuList(pathname: string): Group[] {
+export function getMenuList(pathname: string, users: UserProps[]): Group[] {
   return [
     {
       groupLabel: "",
@@ -37,9 +35,9 @@ export function getMenuList(pathname: string): Group[] {
           label: "General Feed",
           active: pathname.includes("/general-feed"),
           icon: Inbox,
-          submenus: []
-        }
-      ]
+          submenus: [],
+        },
+      ],
     },
     {
       groupLabel: "Messages",
@@ -47,22 +45,30 @@ export function getMenuList(pathname: string): Group[] {
         {
           href: "",
           label: "Direct Messages",
-          active: pathname.includes("/direct-messages"),
+          active: false,
           icon: FaPaperPlane,
-          submenus: [
-            {
-              href: "/direct-messages/:id",
-              label: "Marvin",
-              active: pathname === "/direct-messages/:id",
-              icon: FaUser
-            },
-            {
-              href: "/direct-messages/:id",
-              label: "Mavis",
-              active: pathname === "/direct-messages/:id",
-              icon: FaUser
-            }
-          ]
+          submenus: users.map((user) => {
+            return {
+              href: `/direct-messages/${user._id}`,
+              label: `${user.firstName} ${user.lastName}`,
+              active: pathname === `/direct-messages/${user._id}`,
+              icon: FaUser,
+            };
+          }),
+          // [
+          //   {
+          //     href: "/direct-messages/:id",
+          //     label: "Marvin",
+          //     active: pathname === "/direct-messages/:id",
+          //     icon: FaUser
+          //   },
+          //   {
+          //     href: "/direct-messages/:id",
+          //     label: "Mavis",
+          //     active: pathname === "/direct-messages/:id",
+          //     icon: FaUser
+          //   }
+          // ]
         },
         {
           href: "",
@@ -74,17 +80,17 @@ export function getMenuList(pathname: string): Group[] {
               href: "/channels/:id",
               label: "Marvin",
               active: pathname === "/channels/:id",
-              icon: FaHashtag
+              icon: FaHashtag,
             },
             {
               href: "/posts/new",
               label: "Mavis",
               active: pathname === "/channels/:id",
-              icon: FaHashtag
-            }
-          ]
+              icon: FaHashtag,
+            },
+          ],
         },
-      ]
+      ],
     },
     // {
     //   groupLabel: "Settings",

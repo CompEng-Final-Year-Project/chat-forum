@@ -6,6 +6,7 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import feed from '../routes/feed'
 import chat from '../routes/chat'
+import users from '../routes/users'
 
 export const routes = (app: Application) => {
   const corsOptions: CorsOptions = {
@@ -20,5 +21,6 @@ export const routes = (app: Application) => {
   app.use("/api/auth", auth);
   app.use('/api/feed', feed)
   app.use('/api/chats', chat)
+  app.use('/api/users', users)
   app.use(error);
 };
