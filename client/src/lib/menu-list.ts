@@ -57,7 +57,7 @@ export function getMenuList(pathname: string): Group[] {
               icon: FaUser
             },
             {
-              href: "/posts/new",
+              href: "/direct-messages/:id",
               label: "Mavis",
               active: pathname === "/direct-messages/:id",
               icon: FaUser
