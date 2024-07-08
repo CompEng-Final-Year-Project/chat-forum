@@ -47,7 +47,7 @@ export function getMenuList(pathname: string, users: UserProps[]): Group[] {
           label: "Direct Messages",
           active: false,
           icon: FaPaperPlane,
-          submenus: users.map((user) => {
+          submenus: users?.map((user) => {
             return {
               href: `/direct-messages/${user._id}`,
               label: `${user.firstName} ${user.lastName}`,

@@ -4,7 +4,7 @@ import type { IChat } from "../types/types";
 const chatSchema = new Schema<IChat>({
     members: [{type: Schema.Types.ObjectId, ref: 'User'} ],
     type: {type: String, enum: ["course", "program", "department", "direct"], required: true},
-    course: {type: Schema.Types.ObjectId, ref: 'Course'},
+    courses: [{type: Schema.Types.ObjectId, ref: 'Course'}],
     program: {type: Schema.Types.ObjectId, ref: 'Program'},
     department: {type: Schema.Types.ObjectId, ref: 'Department'},
     messages: [

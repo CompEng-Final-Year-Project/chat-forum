@@ -18,6 +18,7 @@ const departmentSchema = new Schema<IDepartment>({
         type: Schema.Types.ObjectId,
         ref: "User",
         required: true,
+        unique: true
     }]
 }, {timestamps: true})
 

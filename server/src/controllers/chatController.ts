@@ -1,22 +1,62 @@
 import { Request, Response } from "express";
 import Chat from "../models/chatModel";
+import User from "../models/userModel";
 import { logger } from "../startup/logger";
 
 export const createChat = async (req: Request, res: Response) => {
   try {
-    const { members, type, course, program, department } = req.body;
+    const currentUser = await User.findById(req.user?._id);
+    if (!currentUser) {
+      return res.status(404).json({ error: "Current user not found" });
+    }
+
+    const { userId } = req.params;
+
+    const otherUser = await User.findById(userId);
+    if (!otherUser) {
+      return res.status(404).json({ error: "Other user not found" });
+    }
+
+    const existingChat = await Chat.findOne({
+      members: { $all: [currentUser._id, otherUser._id] },
+      type: "direct"
+    });
+
+    if (existingChat) {
+      return res.status(400).json({ error: "Chat already exists between the users" });
+    }
+
+    if (!currentUser.courses || !otherUser.courses) {
+      return res.status(400).json({ error: "Courses not populated correctly" });
+    }
+
+
+    const commonCourses = currentUser.courses.filter((course: any) =>
+      otherUser.courses.some((otherCourse: any) => course._id.equals(otherCourse._id))
+    );
+    console.log(commonCourses)
+
+    if (commonCourses.length === 0) {
+      return res.status(400).json({
+        error: "Both users must share at least one course to create a chat",
+      });
+    }
+
+    const commonCourseIds = commonCourses.map((course: any) => course._id);
+    console.log(commonCourseIds)
 
     const chat = new Chat({
-      members,
-      type,
-      course,
-      program,
-      department,
+      members: [currentUser._id, otherUser._id],
+      type: "direct",
+      courses: commonCourseIds,
       messages: [],
+      department: currentUser.department._id,
     });
 
     await chat.save();
-    res.status(201).json({ message: "Chat successfully created", chat });
+    res
+      .status(201)
+      .json({ message: "Direct message chat successfully created", chat });
   } catch (error) {
     logger.error((error as Error).message);
     res.status(500).json({ error: "Failed to create chat" });

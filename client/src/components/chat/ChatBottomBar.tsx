@@ -8,10 +8,10 @@ import React, { useRef, useState } from "react";
 import { buttonVariants } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Message, loggedInUserData } from "@/assets/data";
 import { EmojiPicker } from "../EmojiPicker";
 
 import { Input } from "../ui/input";
+import { Message } from "@/types";
 
 interface ChatBottomBarProps {
   sendMessage: (newMessage: Message) => void;
@@ -41,9 +41,7 @@ const ChatBottomBar = ({
   const handleSend = () => {
     if (message.trim()) {
       const newMessage: Message = {
-        id: message.length + 1,
-        name: loggedInUserData.name,
-        avatar: loggedInUserData.avatar,
+        _id: `${message.length + 1}`,
         message: message.trim(),
       };
       sendMessage(newMessage);

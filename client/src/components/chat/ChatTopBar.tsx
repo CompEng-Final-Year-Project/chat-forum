@@ -1,12 +1,12 @@
 
-import { UserData } from '@/assets/data';
 // import { Info, Phone, Video } from 'lucide-react';
 // import { cn } from '@/lib/utils';
+import { UserProps } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 // import { buttonVariants } from '../ui/button';
 
 interface ChatTopbarProps {
-    selectedUser: UserData;
+    selectedUser: UserProps;
     }
 
 
@@ -16,8 +16,8 @@ export default function ChatTopbar({selectedUser}: ChatTopbarProps) {
         <div className="flex items-center gap-2">
           <Avatar className="flex justify-center items-center">
             <AvatarImage
-              src={selectedUser.avatar}
-              alt={selectedUser.name}
+              src={selectedUser?.avatar}
+              alt={selectedUser?.name}
               width={6}
               height={6}
               className="w-10 h-10 "
@@ -25,7 +25,7 @@ export default function ChatTopbar({selectedUser}: ChatTopbarProps) {
               <AvatarFallback>JD</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-medium">{selectedUser.name}</span>
+            <span className="font-medium">{selectedUser?.name}</span>
             <span className="text-xs">Active 2 mins ago</span>
           </div>
         </div>

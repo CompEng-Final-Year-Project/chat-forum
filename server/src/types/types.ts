@@ -20,8 +20,8 @@ export interface IUser extends Document {
   password: string;
   role: "student" | "lecturer" | "HOD";
   indexNumber: string;
-  department: Schema.Types.ObjectId;
-  courses: Schema.Types.ObjectId;
+  department: { _id: Schema.Types.ObjectId; name: string };
+  courses:  { _id: Schema.Types.ObjectId; name: string }[];
   generateAuthToken: () => string;
 }
 
@@ -43,28 +43,28 @@ export interface IFeed extends Document {
 export interface IChat extends Document {
   members: Schema.Types.ObjectId[];
   type: "course" | "program" | "department" | "direct";
-  course?: Schema.Types.ObjectId;
+  courses?: Schema.Types.ObjectId[];
   program?: Schema.Types.ObjectId;
   department?: Schema.Types.ObjectId;
   messages: { sender: Schema.Types.ObjectId; text: string; createdAt: Date }[];
 }
 
 export interface IDepartment extends Document {
-    name: string;
-    head: Schema.Types.ObjectId
-    lecturers: Schema.Types.ObjectId[]
+  name: string;
+  head: Schema.Types.ObjectId;
+  lecturers: Schema.Types.ObjectId[];
 }
 
 export interface IProgram extends Document {
-    name: string;
-    department: Schema.Types.ObjectId
-    courses: Schema.Types.ObjectId[]
+  name: string;
+  department: Schema.Types.ObjectId;
+  courses: Schema.Types.ObjectId[];
 }
 
 export interface ICourse extends Document {
-    name: string;
-    code: string;
-    department: Schema.Types.ObjectId;
-    lecturers: Schema.Types.ObjectId[];
-    students: Schema.Types.ObjectId[];
-  }
+  name: string;
+  code: string;
+  department: Schema.Types.ObjectId;
+  lecturers: Schema.Types.ObjectId[];
+  students: Schema.Types.ObjectId[];
+}

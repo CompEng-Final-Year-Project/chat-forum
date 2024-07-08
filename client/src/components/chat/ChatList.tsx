@@ -1,13 +1,13 @@
-import { Message, UserData } from "@/assets/data";
 import { cn } from "@/lib/utils";
 import React, { useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import ChatBottomBar from "./ChatBottomBar";
 import { AnimatePresence, motion } from "framer-motion";
+import { Message, UserProps } from "@/types";
 
 interface ChatListProps {
   messages?: Message[];
-  selectedUser: UserData;
+  selectedUser: UserProps;
   sendMessage: (newMessage: Message) => void;
 }
 

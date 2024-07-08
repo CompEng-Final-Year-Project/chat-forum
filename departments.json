@@ -1,0 +1,43 @@
+[
+  {
+    "_id": {"$oid":"668a14eb8238987d60db0801"},
+    "name": "Computer Engineering",
+    "head": {"$oid":"668a14d58238987d60db0140"},
+    "lecturers": [
+      {
+        "_id": {"$oid":"668a14d58238987d60db0710"},
+        "firstName": "John",
+        "lastName": "Doe"
+      },
+      {
+        "_id": {"$oid":"668a14d58238987d60db0114"},
+        "firstName": "Samuel",
+        "lastName": "Doe"
+      }
+    ]
+  },
+  {
+    "_id": {"$oid":"668a14eb8238987d60db0802"},
+    "name": "Electrical Engineering",
+    "head": {"$oid":"668a14d58238987d60db0150"},
+    "lecturers": [
+      {
+        "_id": {"$oid":"668a14d58238987d60db0160"},
+        "firstName": "Sarah",
+        "lastName": "Anderson"
+      }
+    ]
+  },
+  {
+    "_id": {"$oid":"668a14eb8238987d60db0803"},
+    "name": "Mechanical Engineering",
+    "head": {"$oid":"668a14d58238987d60db0190"},
+    "lecturers": [
+      {
+        "_id": {"$oid":"668a14d58238987d60db0101"},
+        "firstName": "William",
+        "lastName": "Martinez"
+      }
+    ]
+  }
+]

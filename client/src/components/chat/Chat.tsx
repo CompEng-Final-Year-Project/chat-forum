@@ -1,11 +1,12 @@
-import { Message, UserData } from "@/assets/data";
+// import { Message, UserData } from "@/assets/data";
 import ChatTopbar from "./ChatTopBar";
 import { ChatList } from "./ChatList";
 import React from "react";
+import { Message, UserProps } from "@/types";
 
 interface ChatProps {
   messages?: Message[];
-  selectedUser: UserData;
+  selectedUser: UserProps;
 }
 
 export function Chat({ messages, selectedUser }: ChatProps) {

@@ -5,6 +5,32 @@ import Joi from "joi";
 import type { IUser, ValidateUserProps } from "../types/types";
 import _ from "lodash";
 
+export const departmentSchema = new Schema({
+  _id: {
+    type: Schema.Types.ObjectId,
+    ref: "Department",
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+});
+
+// Define a sub-schema for courses
+const courseSchema = new Schema({
+  _id: {
+    type: Schema.Types.ObjectId,
+    ref: "Course",
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+});
+
+
 const userSchema = new Schema<IUser>({
   firstName: {
     type: String,
@@ -46,13 +72,11 @@ const userSchema = new Schema<IUser>({
     enum: ["student", "lecturer", "HOD"],
   },
   department: {
-    type: Schema.Types.ObjectId,
-    ref: "Department",
+    type: departmentSchema,
     required: true,
   },
   courses: {
-    type: Schema.Types.ObjectId,
-    ref: "Course",
+    type: [courseSchema],
     required: true,
   },
 });
