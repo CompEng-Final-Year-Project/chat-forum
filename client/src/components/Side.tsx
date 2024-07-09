@@ -61,7 +61,7 @@ export function Side({ links, isCollapsed, isMobile }: SidebarProps) {
         </div>
       )}
       <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-        {links.map((link, index) =>
+        {links?.map((link, index) =>
           isCollapsed ? (
             <TooltipProvider key={index}>
               <Tooltip key={index} delayDuration={0}>

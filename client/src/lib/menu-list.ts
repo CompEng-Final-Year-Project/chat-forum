@@ -18,6 +18,7 @@ type Menu = {
   active: boolean;
   icon: Icon;
   submenus: Submenu[];
+  userId?: string
 };
 
 type Group = {
@@ -53,6 +54,7 @@ export function getMenuList(pathname: string, users: UserProps[]): Group[] {
               label: `${user.firstName} ${user.lastName}`,
               active: pathname === `/direct-messages/${user._id}`,
               icon: FaUser,
+              userId: user._id
             };
           }),
           // [

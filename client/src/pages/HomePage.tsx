@@ -15,6 +15,8 @@ const HomePage = () => {
       <div className="md:hidden">
         <SheetSideBar />
       </div>
+      <div className="overflow-y-auto w-full">
+
       <Routes>
         <Route path="/general-feed" element={<Dashboard />} />
         <Route
@@ -25,6 +27,7 @@ const HomePage = () => {
           }
         />
       </Routes>
+      </div>
     </div>
   );
 };

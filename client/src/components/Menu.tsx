@@ -1,5 +1,4 @@
 import { Ellipsis, LogOut } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 import { getMenuList } from "@/lib/menu-list";
 import { Button } from "@/components/ui/button";
@@ -13,21 +12,25 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { CollapseMenuButton } from "./CollapseMenuButton";
 import { useAuth } from "@/contexts/AuthContext";
+import { ChatContext } from "@/contexts/ChatContext";
+import { useContext } from "react";
+import { UserProps } from "@/types";
 
 interface MenuProps {
   isOpen: boolean | undefined;
 }
 
 export function Menu({ isOpen }: MenuProps) {
-  const {pathname} = useLocation();
-  const {logout, users} = useAuth()
-  const menuList = getMenuList(pathname, users);
+  const { pathname } = useLocation();
+  const { logout } = useAuth();
+  const { createChat, userChats, potentialChats } = useContext(ChatContext);
+  const menuList = getMenuList(pathname, userChats as UserProps[]);
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">
-      <nav className=" h-full w-full md:mt-5">
+      <nav className="h-full w-full md:mt-5">
         <ul className="flex flex-col min-h-[calc(100vh-48px-36px-16px-32px)] lg:min-h-[calc(100vh-32px-40px-32px)] items-start space-y-1 px-2">
-          {menuList.map(({ groupLabel, menus }, index) => (
+          {menuList?.map(({ groupLabel, menus }, index) => (
             <li className={cn("w-full", groupLabel ? "pt-5" : "")} key={index}>
               {(isOpen && groupLabel) || isOpen === undefined ? (
                 <p className="text-sm font-medium text-muted-foreground px-4 pb-2 max-w-[248px] truncate">
@@ -62,9 +65,7 @@ export function Menu({ isOpen }: MenuProps) {
                               asChild
                             >
                               <Link to={href}>
-                                <span
-                                  className={cn(isOpen === false ? "" : "mr-4")}
-                                >
+                                <span className={cn(isOpen === false ? "" : "mr-4")}>
                                   <Icon size={18} />
                                 </span>
                                 <p
@@ -80,7 +81,7 @@ export function Menu({ isOpen }: MenuProps) {
                               </Link>
                             </Button>
                           </TooltipTrigger>
-                          {isOpen === false && (
+                          {isOpen === true && (
                             <TooltipContent side="right">
                               {label}
                             </TooltipContent>
@@ -98,17 +99,65 @@ export function Menu({ isOpen }: MenuProps) {
                         isOpen={isOpen}
                       />
                     </div>
-                    
                   )
               )}
             </li>
           ))}
+
+          {userChats?.length === 0 && (
+            <li className="w-full flex justify-center items-center">
+              <p className="text-muted-foreground">No chats available. Start a chat below.</p>
+            </li>
+          )}
+
+          {potentialChats && potentialChats.length > 0 && (
+            <li className="w-full pt-5">
+              <p className="text-sm font-medium text-muted-foreground px-4 pb-2 max-w-[248px] truncate">
+                Potential Chats
+              </p>
+              {potentialChats.map((user, index) => (
+                <div className="w-full" key={index}>
+                  <TooltipProvider disableHoverableContent>
+                    <Tooltip delayDuration={100}>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start h-10 mb-1"
+                          onClick={() => createChat(user._id)}
+                        >
+                          <span className={cn(isOpen === false ? "" : "mr-4")}>
+                            <Ellipsis size={18} />
+                          </span>
+                          <p
+                            className={cn(
+                              "max-w-[200px] truncate",
+                              isOpen === false
+                                ? "-translate-x-96 opacity-0"
+                                : "translate-x-0 opacity-100"
+                            )}
+                          >
+                            {`${user.firstName} ${user.lastName}`}
+                          </p>
+                        </Button>
+                      </TooltipTrigger>
+                      {isOpen === true && (
+                        <TooltipContent side="right">{`${user.firstName} ${user.lastName}`}</TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              ))}
+            </li>
+          )}
+
           <li className="w-full grow flex items-end">
             <TooltipProvider disableHoverableContent>
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={() => {logout()}}
+                    onClick={() => {
+                      logout();
+                    }}
                     variant="outline"
                     className="w-full justify-center h-10 mt-5"
                   >

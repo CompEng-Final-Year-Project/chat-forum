@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         if (user) {
           const response = await getRequest(`${baseUrl}/users`);
-          setUsers(response.users);
+          setUsers(response?.users);
         }
       } catch (error) {
         console.log(error);

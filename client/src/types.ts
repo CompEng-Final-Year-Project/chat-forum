@@ -15,7 +15,7 @@ export interface UserProps {
   email: string;
   role: "student" | "lecturer" | "HOD";
   department: string;
-  courses: string[];
+  courses: {_id: string, name: string}[];
   _id: string
 }
 
@@ -46,4 +46,9 @@ export interface User {
   avatar: string;
   messages: Message[];
   name: string;
+}
+
+export interface UserChat{
+  _id: string
+  members: string[]
 }

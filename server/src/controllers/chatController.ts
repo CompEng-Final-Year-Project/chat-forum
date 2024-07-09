@@ -30,11 +30,9 @@ export const createChat = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Courses not populated correctly" });
     }
 
-
     const commonCourses = currentUser.courses.filter((course: any) =>
       otherUser.courses.some((otherCourse: any) => course._id.equals(otherCourse._id))
     );
-    console.log(commonCourses)
 
     if (commonCourses.length === 0) {
       return res.status(400).json({
@@ -42,8 +40,7 @@ export const createChat = async (req: Request, res: Response) => {
       });
     }
 
-    const commonCourseIds = commonCourses.map((course: any) => course._id);
-    console.log(commonCourseIds)
+    const commonCourseIds = commonCourses?.map((course: any) => course._id);
 
     const chat = new Chat({
       members: [currentUser._id, otherUser._id],
@@ -65,10 +62,7 @@ export const createChat = async (req: Request, res: Response) => {
 
 export const getChats = async (req: Request, res: Response) => {
   try {
-    const chats = await Chat.find({ members: req.user?._id }).populate(
-      "members"
-    );
-
+    const chats = await Chat.find({ members: req.user?._id })
     res.status(200).json({ message: "Chats successfully fetched", chats });
   } catch (error) {
     logger.error((error as Error).message);

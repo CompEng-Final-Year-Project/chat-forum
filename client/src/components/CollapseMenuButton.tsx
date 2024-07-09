@@ -98,7 +98,7 @@ export function CollapseMenuButton({
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-        {submenus.map(({ href, label, active, icon: Icon }, index) => (
+        {submenus?.map(({ href, label, active, icon: Icon }, index) => (
           <Button
             key={index}
             variant={active ? "secondary" : "ghost"}
@@ -162,7 +162,7 @@ export function CollapseMenuButton({
           {label}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {submenus.map(({ href, label }, index) => (
+        {submenus?.map(({ href, label }, index) => (
           <DropdownMenuItem key={index} asChild>
             <Link className="cursor-pointer" to={href}>
               <p className="max-w-[180px] truncate">{label}</p>

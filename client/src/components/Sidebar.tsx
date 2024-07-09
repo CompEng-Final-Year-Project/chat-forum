@@ -3,7 +3,7 @@ import { Menu } from "./Menu";
 
 const Sidebar = () => {
   return (
-    <div className="bg-muted/40 p-4 md:w-64 md:border-r">
+    <div className="bg-muted/40 h-screen p-4 md:w-64 md:border-r">
       <div className="flex items-center gap-2 mb-4">
         <img
           src={uenrLogo}
