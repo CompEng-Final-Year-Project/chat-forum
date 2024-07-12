@@ -1,8 +1,9 @@
-import { AuthContextProps, UserProps } from "@/types";
 import { baseUrl, getRequest, postRequest } from "@/utils/services";
 import {
   createContext,
+  Dispatch,
   ReactNode,
+  SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -10,13 +11,28 @@ import {
 } from "react";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import { UserProps } from "@/types";
+import { useNavigate } from "react-router-dom";
+
+interface AuthContextProps {
+  user: UserProps | null;
+  users: UserProps[];
+  setUser: Dispatch<SetStateAction<UserProps | null>>;
+  login: (
+    url: string,
+    body: BodyInit
+  ) => Promise<{ message: string; error: boolean }>;
+  logout: () => Promise<{ message: string; error: boolean }>;
+  getUser: (userId: string) => Promise<UserProps | null>;
+}
 
 export const AuthContext = createContext<AuthContextProps>({
   user: null,
   setUser: () => null,
   login: () => Promise.resolve({ message: "", error: false }),
   logout: () => Promise.resolve({ message: "", error: false }),
-  users: []
+  users: [],
+  getUser: () => Promise.resolve(null),
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -24,6 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const user = sessionStorage.getItem("user");
     return user ? JSON.parse(user) : null;
   });
+  const navigate = useNavigate()
 
   const [users, setUsers] = useState<UserProps[]>([]);
 
@@ -56,10 +73,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const getUser = useCallback(async (userId: string) => {
+    try {
+      const response = await getRequest(`${baseUrl}/users/${userId}`);
+      return response.user;
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     Cookies.remove("token");
     sessionStorage.removeItem("user");
     setUser(null);
+    localStorage.clear()
+    navigate('/sign-in')
     return Promise.resolve({
       message: "Logged out successfully",
       error: false,
@@ -71,7 +99,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser,
     login,
     logout,
-    users
+    users,
+    getUser,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

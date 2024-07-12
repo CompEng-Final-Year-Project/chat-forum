@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
 
 export interface LoginProps {
   indexNumber: string;
@@ -19,26 +18,10 @@ export interface UserProps {
   _id: string
 }
 
-export interface AuthContextProps {
-  user: UserProps | null;
-  users: UserProps[];
-  setUser: Dispatch<SetStateAction<UserProps | null>>;
-  login: (url: string, body: BodyInit) => Promise<{message: string, error: boolean}>
-  logout: () => Promise<{message: string, error: boolean}>
-}
-
-export const loggedInUserData = {
-  id: 5,
-  avatar: '/LoggedInUser.jpg',
-  name: 'Jakob Hoeg',
-};
-
-
 export interface Message {
-  _id: string;
-  message: string;
-  senderId: string;
-  createdAt: string;
+  text: string;
+  sender: string;
+  createdAt: Date;
 }
 
 export interface User {
@@ -51,4 +34,10 @@ export interface User {
 export interface UserChat{
   _id: string
   members: string[]
+  messages: Message[]
+}
+
+export interface UserChatWithId {
+  user: UserProps;
+  chatId: string;
 }

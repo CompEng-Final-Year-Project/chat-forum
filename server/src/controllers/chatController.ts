@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Chat from "../models/chatModel";
 import User from "../models/userModel";
 import { logger } from "../startup/logger";
+import mongoose from "mongoose";
 
 export const createChat = async (req: Request, res: Response) => {
   try {
@@ -69,3 +70,45 @@ export const getChats = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to get chats" });
   }
 };
+
+export const addMessage = async (req: Request, res: Response) => {
+  try{
+    const {chatId, text} = req.body
+
+    if(!mongoose.Types.ObjectId.isValid(chatId)){
+      return res.status(400).json({error: "Invalid chat id"})
+    }
+
+    const chat = await Chat.findById(chatId)
+
+    if(!chat){
+      return res.status(404).json({error: "Chat not found"})
+    }
+
+    const newMessage = {
+      sender: req.user?._id,
+      text,
+      createdAt: new Date()
+    }
+
+    chat.messages.push(newMessage)
+    await chat.save()
+
+    res.status(200).json({message: "message sent", chat})
+  }catch(error){
+    logger.error((error as Error).message);
+    res.status(500).json({ error: "Failed to send message" });
+  }
+}
+
+// export const getMessages = async (req: Request, res: Response) => {
+//   try{
+//     const {chatId} = req.params
+
+//     const chat = await Chat.find
+
+//   }catch(error){
+//     logger.error((error as Error).message);
+//     res.status(500).json({ error: "Failed to send message" });
+//   }
+// }

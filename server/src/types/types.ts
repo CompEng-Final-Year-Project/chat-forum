@@ -40,13 +40,19 @@ export interface IFeed extends Document {
   updatedAt: Date;
 }
 
+export interface IMessage {
+  sender: mongoose.Types.ObjectId;
+  text: string;
+  createdAt: Date;
+}
+
 export interface IChat extends Document {
   members: Schema.Types.ObjectId[];
   type: "course" | "program" | "department" | "direct";
   courses?: Schema.Types.ObjectId[];
   program?: Schema.Types.ObjectId;
   department?: Schema.Types.ObjectId;
-  messages: { sender: Schema.Types.ObjectId; text: string; createdAt: Date }[];
+  messages: IMessage[];
 }
 
 export interface IDepartment extends Document {

@@ -1,50 +1,36 @@
-import {
-  FileImage,
-  Mic,
-  Paperclip,
-  SendHorizontal,
-} from "lucide-react";
-import React, { useRef, useState } from "react";
-import { buttonVariants } from "../ui/button";
+import { FileImage, Mic, Paperclip, SendHorizontal } from "lucide-react";
+import React, { useContext, useRef, useState } from "react";
+import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { EmojiPicker } from "../EmojiPicker";
 
 import { Input } from "../ui/input";
-import { Message } from "@/types";
+import { ChatContext } from "@/contexts/ChatContext";
 
-interface ChatBottomBarProps {
-  sendMessage: (newMessage: Message) => void;
-}
-
-const ChatBottomBar = ({
-  sendMessage,
-}: ChatBottomBarProps) => {
+const ChatBottomBar = () => {
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const { sendTextMessage, chatId } = useContext(ChatContext);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
   };
 
-//   const handleThumbsUp = () => {
-//     const newMessage: Message = {
-//       id: message.length + 1,
-//       name: loggedInUserData.name,
-//       avatar: loggedInUserData.avatar,
-//       message: "👍",
-//     };
-//     sendMessage(newMessage);
-//     setMessage("");
-//   };
+  //   const handleThumbsUp = () => {
+  //     const newMessage: Message = {
+  //       id: message.length + 1,
+  //       name: loggedInUserData.name,
+  //       avatar: loggedInUserData.avatar,
+  //       message: "👍",
+  //     };
+  //     sendMessage(newMessage);
+  //     setMessage("");
+  //   };
 
   const handleSend = () => {
     if (message.trim()) {
-      const newMessage: Message = {
-        _id: `${message.length + 1}`,
-        message: message.trim(),
-      };
-      sendMessage(newMessage);
+      sendTextMessage(message.trim(), chatId);
       setMessage("");
 
       if (inputRef.current) {
@@ -68,18 +54,17 @@ const ChatBottomBar = ({
   return (
     <div className="p-2  flex justify-between w-full items-center gap-2">
       <div className="flex">
-        <a
-            href="#"
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "icon" }),
-              "h-9 w-9",
-              "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white shrink-0"
-            )}
-            onClick={handleSend}
-          >
-            <Paperclip size={20} className="text-muted-foreground" />
-          </a>
-       
+        <Button
+          variant={"ghost"}
+          size={"icon"}
+          className={cn(
+            "h-9 w-9",
+            "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white shrink-0"
+          )}
+          onClick={handleSend}
+        >
+          <Paperclip size={20} className="text-muted-foreground" />
+        </Button>
       </div>
 
       <AnimatePresence initial={false}>
@@ -121,46 +106,46 @@ const ChatBottomBar = ({
         </motion.div>
 
         {message.trim() ? (
-          <a
-            href="#"
+          <Button
+            variant={"ghost"}
+            size={"icon"}
             className={cn(
-              buttonVariants({ variant: "ghost", size: "icon" }),
               "h-9 w-9",
               "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white shrink-0"
             )}
             onClick={handleSend}
           >
             <SendHorizontal size={20} className="text-muted-foreground" />
-          </a>
+          </Button>
         ) : (
-            // {!message.trim() && !isMobile && (
-                <div className="flex">
-                    <a
-                      href="#"
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "icon" }),
-                        "h-9 w-9",
-                        "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
-                      )}
-                    >
-                      <FileImage size={20} className="text-muted-foreground" />
-                    </a>
-                    <a
-                      href="#"
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "icon" }),
-                        "h-9 w-9",
-                        "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
-                      )}
-                    >
-                      <Mic size={20} className="text-muted-foreground" />
-                    </a>
-                </div>
-            //   )}
+          // {!message.trim() && !isMobile && (
+          <div className="flex">
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              className={cn(
+                "h-9 w-9",
+                "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
+              )}
+            >
+              <FileImage size={20} className="text-muted-foreground" />
+            </Button>
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              className={cn(
+                "h-9 w-9",
+                "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
+              )}
+            >
+              <Mic size={20} className="text-muted-foreground" />
+            </Button>
+          </div>
+          //   )}
         )}
       </AnimatePresence>
     </div>
   );
-}
+};
 
 export default ChatBottomBar;

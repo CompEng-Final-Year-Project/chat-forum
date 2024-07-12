@@ -14,7 +14,7 @@ const chatSchema = new Schema<IChat>({
             createdAt: {type: Date, default: Date.now}
         }
     ]
-})
+}, {timestamps: true})
 
 const Chat = mongoose.model<IChat>('Chat', chatSchema)
 

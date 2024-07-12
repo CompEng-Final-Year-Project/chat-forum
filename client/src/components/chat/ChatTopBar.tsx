@@ -1,50 +1,121 @@
-
 // import { Info, Phone, Video } from 'lucide-react';
 // import { cn } from '@/lib/utils';
-import { UserProps } from '@/types';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-// import { buttonVariants } from '../ui/button';
+import { UserProps } from "@/types";
+import { Avatar, AvatarFallback } from "../ui/avatar";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { ChatContext } from "@/contexts/ChatContext";
+import { getInitials } from "@/utils/helpers";
+import { cn } from "@/lib/utils";
+import { Info } from "lucide-react";
+import { Button } from "../ui/button";
+import { RecipientInfoCard } from "../RecipientInfoCard";
+import { AnimatePresence, motion } from "framer-motion";
+import { Skeleton } from "../ui/skeleton";
 
-interface ChatTopbarProps {
-    selectedUser: UserProps;
+export default function ChatTopBar() {
+  const { user } = useAuth();
+  const {  selectedUser } =
+    useContext(ChatContext);
+  const [showInfoCard, setShowInfoCard] = useState(false);
+  const infoCardRef = useRef<HTMLDivElement>(null)
+  // const [loading, setLoading] = useState(false)
+
+  const sharedCourses = user?.courses.filter((course) =>
+    selectedUser?.courses.some((course2) => course._id === course2._id)
+  );
+
+  const toggleCard = () => {
+    setShowInfoCard(true);
+  };
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if(infoCardRef.current &&!infoCardRef.current.contains(e.target as Node)){
+        setShowInfoCard(false)
+      }
     }
 
+    document.addEventListener('mousedown', handler)
 
-export default function ChatTopbar({selectedUser}: ChatTopbarProps) {
+    return () => {
+      document.removeEventListener('mousedown', handler)
+    }
+  }, [])
+
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     if (recipientId) {
+  //       const user = await getUser(recipientId);
+  //       setSelectedUser(user);
+  //     }
+  //   };
+  //   fetchUser();
+  // }, [getUser, recipientId]);
+  const initials = getInitials(
+    selectedUser?.firstName as string,
+    selectedUser?.lastName as string
+  );
   return (
-    <div className="w-full h-20 flex p-4 justify-between items-center border-b">
+    <div className="relative ">
+      <div className="w-full overflow-hidden h-20 flex p-4 justify-between items-center border-b">
+        {!selectedUser ? 
+        <div className="flex items-center space-x-4">
+        <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-[200px] bg-neutral-200" />
+          <Skeleton className="h-4 w-[150px] bg-neutral-200" />
+        </div>
+      </div>
+        : 
         <div className="flex items-center gap-2">
           <Avatar className="flex justify-center items-center">
-            <AvatarImage
-              src={selectedUser?.avatar}
-              alt={selectedUser?.name}
-              width={6}
-              height={6}
-              className="w-10 h-10 "
-              />
-              <AvatarFallback>JD</AvatarFallback>
+            {/* <AvatarImage
+            src={selectedUser?.avatar}
+            alt={selectedUser?.firstName}
+            width={6}
+            height={6}
+            className="w-10 h-10 "
+          /> */}
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-medium">{selectedUser?.name}</span>
+            <span className="font-medium">{`${selectedUser?.firstName} ${selectedUser?.lastName}`}</span>
             <span className="text-xs">Active 2 mins ago</span>
           </div>
         </div>
+        }
 
-        <div>
-          {/* {TopbarIcons.map((icon, index) => (
-            <a
-              key={index}
-              href="#"
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "icon" }),
-                "h-9 w-9",
-                "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
-              )}
-            >
-              <icon.icon size={20} className="text-muted-foreground" />
-            </a>
-          ))} */}
+        <div  className="">
+          <Button
+            onClick={toggleCard}
+            variant={"ghost"}
+            size={"icon"}
+            className={cn(
+              "h-9 w-9",
+              "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
+            )}
+          >
+            <Info size={20} className="text-muted-foreground" />
+          </Button>
         </div>
       </div>
-  )
+      <AnimatePresence></AnimatePresence>
+      {showInfoCard && (
+        <motion.div
+        ref={infoCardRef}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+          className="fixed right-[20px] top-16 z-30"
+        >
+          <RecipientInfoCard
+            user={selectedUser as UserProps}
+            sharedCourses={sharedCourses as { _id: string; name: string }[]}
+          />
+        </motion.div>
+      )}
+    </div>
+  );
 }

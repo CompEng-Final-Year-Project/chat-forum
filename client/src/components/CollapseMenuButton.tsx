@@ -6,13 +6,13 @@ import { DropdownMenuArrow } from "@radix-ui/react-dropdown-menu";
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger
+  CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-  TooltipProvider
+  TooltipProvider,
 } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
@@ -20,16 +20,25 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuSeparator
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { Icon } from "@/lib/menu-list";
+import { useContext } from "react";
+import { ChatContext } from "@/contexts/ChatContext";
+import { Avatar, AvatarFallback } from "./ui/avatar";
+import { UserProps } from "@/types";
+import { Skeleton } from "./ui/skeleton";
 
 type Submenu = {
   href: string;
   label: string;
   active: boolean;
-  icon: Icon
+  icon?: Icon;
+  initials?: string;
+  recipientId?: string;
+  chatId?: string;
+  user?: UserProps;
 };
 
 interface CollapseMenuButtonProps {
@@ -45,15 +54,15 @@ export function CollapseMenuButton({
   label,
   active,
   submenus,
-  isOpen
+  isOpen,
 }: CollapseMenuButtonProps) {
-//   const isSubmenuActive = submenus.some((submenu) => submenu.active);
-//   const [isCollapsed, setIsCollapsed] = useState<boolean>(isSubmenuActive);
+  const { setRecipientId, setChatId, setSelectedUser } =
+    useContext(ChatContext);
 
   return isOpen ? (
     <Collapsible
-    //   open={isCollapsed}
-    //   onOpenChange={setIsCollapsed}
+      //   open={isCollapsed}
+      //   onOpenChange={setIsCollapsed}
       defaultOpen
       className="w-full"
     >
@@ -98,30 +107,73 @@ export function CollapseMenuButton({
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-        {submenus?.map(({ href, label, active, icon: Icon }, index) => (
-          <Button
-            key={index}
-            variant={active ? "secondary" : "ghost"}
-            className="w-full justify-start h-10 mb-1 text-gray-600"
-            asChild
-          >
-            <Link to={href}>
-              <span className="mr-4 ml-2">
-                <Icon size={18} />
-              </span>
-              <p
-                className={cn(
-                  "max-w-[170px] truncate",
-                  isOpen
-                    ? "translate-x-0 opacity-100"
-                    : "-translate-x-96 opacity-0"
-                )}
-              >
-                {label}
-              </p>
-            </Link>
-          </Button>
-        ))}
+        {!submenus ? (
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[200px] bg-neutral-200" />
+              <Skeleton className="h-4 w-[150px] bg-neutral-200" />
+            </div>
+          </div>
+        ) : (
+          <div className="">
+            {submenus?.map(
+              (
+                {
+                  href,
+                  label,
+                  active,
+                  icon: Icon,
+                  recipientId,
+                  initials,
+                  chatId,
+                  user,
+                },
+                index
+              ) => (
+                <Button
+                  key={index}
+                  variant={active ? "secondary" : "ghost"}
+                  className="w-full justify-start h-10 mb-1 text-gray-600"
+                  asChild
+                  onClick={() => {
+                    setRecipientId(recipientId as string);
+                    if (chatId) {
+                      setChatId(chatId);
+                    }
+                    if (user) {
+                      setSelectedUser(user);
+                    }
+                  }}
+                >
+                  <Link to={href}>
+                    <span className="mr-4 ml-2">
+                      {initials ? (
+                        <Avatar className="flex justify-center items-center">
+                          <AvatarFallback>{initials}</AvatarFallback>
+                        </Avatar>
+                      ) : (
+                        <Avatar className="flex justify-center items-center">
+                          {Icon && <Icon size={18} />}
+                        </Avatar>
+                      )}
+                    </span>
+                    <p
+                      className={cn(
+                        "max-w-[170px] truncate",
+                        isOpen
+                          ? "translate-x-0 opacity-100"
+                          : "-translate-x-96 opacity-0"
+                      )}
+                    >
+                      {label}
+                    </p>
+                  </Link>
+                </Button>
+              )
+            )}
+          </div>
+        )}
       </CollapsibleContent>
     </Collapsible>
   ) : (

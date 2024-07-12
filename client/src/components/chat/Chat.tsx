@@ -1,31 +1,20 @@
 // import { Message, UserData } from "@/assets/data";
-import ChatTopbar from "./ChatTopBar";
+import ChatTopBar from "./ChatTopBar";
 import { ChatList } from "./ChatList";
-import React from "react";
-import { Message, UserProps } from "@/types";
+import  { useContext } from "react";
+import { Message } from "@/types";
+import { ChatContext } from "@/contexts/ChatContext";
 
-interface ChatProps {
-  messages?: Message[];
-  selectedUser: UserProps;
-}
 
-export function Chat({ messages, selectedUser }: ChatProps) {
-  const [messagesState, setMessages] = React.useState<Message[]>(
-    messages ?? []
-  );
-
-  const sendMessage = (newMessage: Message) => {
-    setMessages([...messagesState, newMessage]);
-  };
+export function Chat() {
+  const {messages} = useContext(ChatContext)
 
   return (
     <div className="flex flex-col justify-between w-full h-full">
-      <ChatTopbar selectedUser={selectedUser} />
+      <ChatTopBar />
 
       <ChatList
-        messages={messagesState}
-        selectedUser={selectedUser}
-        sendMessage={sendMessage}
+        messages={messages as Message[]}
       />
     </div>
   );

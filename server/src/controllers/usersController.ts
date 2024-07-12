@@ -3,7 +3,6 @@ import User from "../models/userModel";
 import { IUser } from "../types/types";
 import mongoose from "mongoose";
 
-
 export const getUsers = async (req: Request, res: Response) => {
   try {
     const currentUser = req.user as IUser;
@@ -15,7 +14,6 @@ export const getUsers = async (req: Request, res: Response) => {
       (course) => course._id
     );
 
-    
     const users = allUsers.filter((user) =>
       user.courses?.some((course) =>
         currentUserCourseIds?.some((currentCourseId) =>
@@ -29,5 +27,15 @@ export const getUsers = async (req: Request, res: Response) => {
     res
       .status(500)
       .json({ error: "An error occurred while retrieving users." });
+  }
+};
+
+export const getUser = async (req: Request, res: Response) => {
+  try {
+    const { recipientId } = req.params;
+    const user = await User.findById(recipientId)
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(500).json({ error: "An error occurred while retrieving user." });
   }
 };

@@ -14,7 +14,7 @@ import { CollapseMenuButton } from "./CollapseMenuButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChatContext } from "@/contexts/ChatContext";
 import { useContext } from "react";
-import { UserProps } from "@/types";
+import { UserChatWithId } from "@/types";
 
 interface MenuProps {
   isOpen: boolean | undefined;
@@ -24,7 +24,7 @@ export function Menu({ isOpen }: MenuProps) {
   const { pathname } = useLocation();
   const { logout } = useAuth();
   const { createChat, userChats, potentialChats } = useContext(ChatContext);
-  const menuList = getMenuList(pathname, userChats as UserProps[]);
+  const menuList = getMenuList(pathname, userChats as UserChatWithId[]);
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">
@@ -53,20 +53,21 @@ export function Menu({ isOpen }: MenuProps) {
                 <p className=""></p>
               )}
               {menus?.map(
-                ({ href, label, icon: Icon, active, submenus }, index) =>
-                  submenus?.length === 0 ? (
-                    <div className="w-full" key={index}>
+                ({ href, label, icon: Icon, active, submenus }, index) =>{
+                  return submenus?.length === 0 ? (
+                    <div  className="w-full" key={index}>
                       <TooltipProvider disableHoverableContent>
                         <Tooltip delayDuration={100}>
                           <TooltipTrigger asChild>
                             <Button
+                           
                               variant={active ? "secondary" : "ghost"}
                               className="w-full justify-start h-10 mb-1"
                               asChild
                             >
                               <Link to={href}>
                                 <span className={cn(isOpen === false ? "" : "mr-4")}>
-                                  <Icon size={18} />
+                                  {Icon && <Icon size={18} />}
                                 </span>
                                 <p
                                   className={cn(
@@ -90,7 +91,8 @@ export function Menu({ isOpen }: MenuProps) {
                       </TooltipProvider>
                     </div>
                   ) : (
-                    <div className="w-full" key={index}>
+                    
+                    <div className="w-full"  key={index}>
                       <CollapseMenuButton
                         icon={Icon}
                         label={label}
@@ -99,7 +101,7 @@ export function Menu({ isOpen }: MenuProps) {
                         isOpen={isOpen}
                       />
                     </div>
-                  )
+                  )}
               )}
             </li>
           ))}
