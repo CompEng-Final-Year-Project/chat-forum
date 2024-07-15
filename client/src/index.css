@@ -136,3 +136,16 @@
     -webkit-text-fill-color: transparent;
     background-clip: text
 }
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--foreground-rgb));
+  border-radius: 5px;
+}

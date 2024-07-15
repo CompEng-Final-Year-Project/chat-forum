@@ -16,17 +16,14 @@ const HomePage = () => {
         <SheetSideBar />
       </div>
       <div className="overflow-y-auto w-full">
-
-      <Routes>
-        <Route path="/general-feed" element={<Dashboard />} />
-        <Route
-          path="/direct-messages/:id"
-          element={
-            <ChatLayout
-            />
-          }
-        />
-      </Routes>
+        <Routes>
+          <Route path="/general-feed" element={<Dashboard />} />
+          <Route
+            path="/direct-messages/:id"
+            element={<ChatLayout type="direct" />}
+          />
+          <Route path="/channels/:id" element={<ChatLayout type="course" />} />
+        </Routes>
       </div>
     </div>
   );

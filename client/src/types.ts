@@ -1,4 +1,7 @@
-
+export interface OnlineUsers{
+  userId: string
+  socketId: string
+}
 export interface LoginProps {
   indexNumber: string;
   password: string;
@@ -35,9 +38,18 @@ export interface UserChat{
   _id: string
   members: string[]
   messages: Message[]
+  type: "direct" | "course"
+  name?: string
 }
 
 export interface UserChatWithId {
   user: UserProps;
   chatId: string;
+  messages: Message[];
+}
+export interface UserGroupChatWithId {
+  users: UserProps[];
+  chatId: string;
+  messages: Message[];
+  name: string;
 }

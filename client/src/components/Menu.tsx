@@ -12,9 +12,8 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { CollapseMenuButton } from "./CollapseMenuButton";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChatContext } from "@/contexts/ChatContext";
-import { useContext } from "react";
-import { UserChatWithId } from "@/types";
+import { useChat } from "@/contexts/ChatContext";
+import { UserChatWithId, UserGroupChatWithId } from "@/types";
 
 interface MenuProps {
   isOpen: boolean | undefined;
@@ -23,8 +22,8 @@ interface MenuProps {
 export function Menu({ isOpen }: MenuProps) {
   const { pathname } = useLocation();
   const { logout } = useAuth();
-  const { createChat, userChats, potentialChats } = useContext(ChatContext);
-  const menuList = getMenuList(pathname, userChats as UserChatWithId[]);
+  const { createChat, userChats, potentialChats, userGroupChats } = useChat();
+  const menuList = getMenuList(pathname, userChats as UserChatWithId[], userGroupChats as UserGroupChatWithId[]);
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">

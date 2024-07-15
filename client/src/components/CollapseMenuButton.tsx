@@ -24,8 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { Icon } from "@/lib/menu-list";
-import { useContext } from "react";
-import { ChatContext } from "@/contexts/ChatContext";
+import { useChat } from "@/contexts/ChatContext";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { UserProps } from "@/types";
 import { Skeleton } from "./ui/skeleton";
@@ -57,7 +56,7 @@ export function CollapseMenuButton({
   isOpen,
 }: CollapseMenuButtonProps) {
   const { setRecipientId, setChatId, setSelectedUser } =
-    useContext(ChatContext);
+    useChat();
 
   return isOpen ? (
     <Collapsible
@@ -131,45 +130,58 @@ export function CollapseMenuButton({
                 },
                 index
               ) => (
-                <Button
-                  key={index}
-                  variant={active ? "secondary" : "ghost"}
-                  className="w-full justify-start h-10 mb-1 text-gray-600"
-                  asChild
-                  onClick={() => {
-                    setRecipientId(recipientId as string);
-                    if (chatId) {
-                      setChatId(chatId);
-                    }
-                    if (user) {
-                      setSelectedUser(user);
-                    }
-                  }}
-                >
-                  <Link to={href}>
-                    <span className="mr-4 ml-2">
-                      {initials ? (
-                        <Avatar className="flex justify-center items-center">
-                          <AvatarFallback>{initials}</AvatarFallback>
-                        </Avatar>
-                      ) : (
-                        <Avatar className="flex justify-center items-center">
-                          {Icon && <Icon size={18} />}
-                        </Avatar>
-                      )}
-                    </span>
-                    <p
-                      className={cn(
-                        "max-w-[170px] truncate",
-                        isOpen
-                          ? "translate-x-0 opacity-100"
-                          : "-translate-x-96 opacity-0"
-                      )}
-                    >
-                      {label}
-                    </p>
-                  </Link>
-                </Button>
+                <TooltipProvider key={index} disableHoverableContent>
+                  <Tooltip delayDuration={100}>
+                    <TooltipTrigger >
+                      <Button
+                        key={index}
+                        variant={active ? "secondary" : "ghost"}
+                        className="w-full justify-start h-10 mb-1 text-gray-600"
+                        asChild
+                        onClick={() => {
+                          setRecipientId(recipientId as string);
+                          if (chatId) {
+                            setChatId(chatId);
+                          }
+                          if (user) {
+                            setSelectedUser(user);
+                          }
+                        }}
+                      >
+                        <Link to={href}>
+                          <span className="mr-4 ml-2">
+                            {initials ? (
+                              <Avatar className="flex justify-center items-center">
+                                <AvatarFallback>{initials}</AvatarFallback>
+                              </Avatar>
+                            ) : (
+                              <Avatar className="flex justify-center items-center">
+                                {Icon && <Icon size={18} />}
+                              </Avatar>
+                            )}
+                          </span>
+                          <p
+                            className={cn(
+                              "max-w-[100px] truncate",
+                              isOpen
+                                ? "translate-x-0 opacity-100"
+                                : "-translate-x-96 opacity-0"
+                            )}
+                          >
+                            {label}
+                          </p>
+                        </Link>
+                      </Button>
+                      <TooltipContent
+                        side="right"
+                        align="start"
+                        
+                      >
+                        {label}
+                      </TooltipContent>
+                    </TooltipTrigger>
+                  </Tooltip>
+                </TooltipProvider>
               )
             )}
           </div>

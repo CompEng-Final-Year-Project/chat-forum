@@ -2,23 +2,22 @@
 // import { cn } from '@/lib/utils';
 import { UserProps } from "@/types";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChatContext } from "@/contexts/ChatContext";
+import { useChat } from "@/contexts/ChatContext";
 import { getInitials } from "@/utils/helpers";
 import { cn } from "@/lib/utils";
-import { Info } from "lucide-react";
+import { HashIcon, Info } from "lucide-react";
 import { Button } from "../ui/button";
 import { RecipientInfoCard } from "../RecipientInfoCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { Skeleton } from "../ui/skeleton";
 
-export default function ChatTopBar() {
+export default function ChatTopBar({type}: {type: "direct" | "course"}) {
   const { user } = useAuth();
-  const {  selectedUser } =
-    useContext(ChatContext);
+  const { selectedUser, channel } = useChat();
   const [showInfoCard, setShowInfoCard] = useState(false);
-  const infoCardRef = useRef<HTMLDivElement>(null)
+  const infoCardRef = useRef<HTMLDivElement>(null);
   // const [loading, setLoading] = useState(false)
 
   const sharedCourses = user?.courses.filter((course) =>
@@ -31,27 +30,21 @@ export default function ChatTopBar() {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if(infoCardRef.current &&!infoCardRef.current.contains(e.target as Node)){
-        setShowInfoCard(false)
+      if (
+        infoCardRef.current &&
+        !infoCardRef.current.contains(e.target as Node)
+      ) {
+        setShowInfoCard(false);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handler)
+    document.addEventListener("mousedown", handler);
 
     return () => {
-      document.removeEventListener('mousedown', handler)
-    }
-  }, [])
+      document.removeEventListener("mousedown", handler);
+    };
+  }, []);
 
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     if (recipientId) {
-  //       const user = await getUser(recipientId);
-  //       setSelectedUser(user);
-  //     }
-  //   };
-  //   fetchUser();
-  // }, [getUser, recipientId]);
   const initials = getInitials(
     selectedUser?.firstName as string,
     selectedUser?.lastName as string
@@ -59,34 +52,61 @@ export default function ChatTopBar() {
   return (
     <div className="relative ">
       <div className="w-full overflow-hidden h-20 flex p-4 justify-between items-center border-b">
-        {!selectedUser ? 
-        <div className="flex items-center space-x-4">
-        <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-[200px] bg-neutral-200" />
-          <Skeleton className="h-4 w-[150px] bg-neutral-200" />
-        </div>
-      </div>
-        : 
-        <div className="flex items-center gap-2">
-          <Avatar className="flex justify-center items-center">
-            {/* <AvatarImage
+        {type === "direct" ? (
+          <>
+            {!selectedUser ? (
+              <div className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[200px] bg-neutral-200" />
+                  <Skeleton className="h-4 w-[150px] bg-neutral-200" />
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Avatar className="flex justify-center items-center">
+                  {/* <AvatarImage
             src={selectedUser?.avatar}
             alt={selectedUser?.firstName}
             width={6}
             height={6}
             className="w-10 h-10 "
-          /> */}
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="font-medium">{`${selectedUser?.firstName} ${selectedUser?.lastName}`}</span>
-            <span className="text-xs">Active 2 mins ago</span>
-          </div>
-        </div>
-        }
+            /> */}
+                  <AvatarFallback>{initials}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="font-medium">{`${selectedUser?.firstName} ${selectedUser?.lastName}`}</span>
+                  <span className="text-xs">Active 2 mins ago</span>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+          {!channel ? (
+              <div className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[200px] bg-neutral-200" />
+                  <Skeleton className="h-4 w-[150px] bg-neutral-200" />
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Avatar className="flex justify-center items-center">
+                  
+                  <AvatarFallback><HashIcon/></AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="font-medium">{channel.name}</span>
+                  <span className="text-xs">Active 2 mins ago</span>
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
-        <div  className="">
+        <div className="">
           <Button
             onClick={toggleCard}
             variant={"ghost"}
@@ -103,7 +123,7 @@ export default function ChatTopBar() {
       <AnimatePresence></AnimatePresence>
       {showInfoCard && (
         <motion.div
-        ref={infoCardRef}
+          ref={infoCardRef}
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
@@ -113,6 +133,8 @@ export default function ChatTopBar() {
           <RecipientInfoCard
             user={selectedUser as UserProps}
             sharedCourses={sharedCourses as { _id: string; name: string }[]}
+            type={type}
+            channel={channel!}
           />
         </motion.div>
       )}

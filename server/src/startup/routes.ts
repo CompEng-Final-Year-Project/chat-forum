@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 import feed from '../routes/feed'
 import chat from '../routes/chat'
 import users from '../routes/users'
-import message from '../routes/messsage'
+import message from '../routes/message'
 
 export const routes = (app: Application) => {
   const corsOptions: CorsOptions = {
@@ -24,5 +24,5 @@ export const routes = (app: Application) => {
   app.use('/api/chats', chat)
   app.use('/api/users', users)
   app.use('/api/message', message)
-  app.use(error);
+ app.use(error);
 };

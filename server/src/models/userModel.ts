@@ -30,7 +30,6 @@ const courseSchema = new Schema({
   },
 });
 
-
 const userSchema = new Schema<IUser>({
   firstName: {
     type: String,
@@ -79,6 +78,8 @@ const userSchema = new Schema<IUser>({
     type: [courseSchema],
     required: true,
   },
+  online: { type: Boolean, default: false },
+  lastSeen: { type: Date },
 });
 
 const jwtPrivateKey = process.env.JWTPrivateKey;

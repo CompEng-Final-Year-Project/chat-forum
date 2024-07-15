@@ -7,16 +7,19 @@ import { AuthProvider } from "./contexts/AuthContext.tsx";
 import { Toaster } from "@/components/ui/toaster";
 import { PostProvider } from "./contexts/PostContext.tsx";
 import { ChatProvider } from "./contexts/ChatContext.tsx";
+import { SocketProvider } from "./contexts/SocketContext.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <PostProvider>
-          <ChatProvider >
-            <Toaster />
-            <App />
+            <SocketProvider>
+          <ChatProvider>
+              <Toaster />
+              <App />
           </ChatProvider>
+            </SocketProvider>
         </PostProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -23,6 +23,8 @@ export interface IUser extends Document {
   department: { _id: Schema.Types.ObjectId; name: string };
   courses:  { _id: Schema.Types.ObjectId; name: string }[];
   generateAuthToken: () => string;
+  online: boolean
+  lastSeen: Date
 }
 
 export interface TokenPayload extends JwtPayload {
@@ -53,6 +55,7 @@ export interface IChat extends Document {
   program?: Schema.Types.ObjectId;
   department?: Schema.Types.ObjectId;
   messages: IMessage[];
+  name?: string
 }
 
 export interface IDepartment extends Document {
@@ -70,7 +73,7 @@ export interface IProgram extends Document {
 export interface ICourse extends Document {
   name: string;
   code: string;
-  department: Schema.Types.ObjectId;
+  department: { _id: Schema.Types.ObjectId; name: string };
   lecturers: Schema.Types.ObjectId[];
   students: Schema.Types.ObjectId[];
 }

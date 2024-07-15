@@ -1,4 +1,4 @@
-import { UserChatWithId, UserProps } from "@/types";
+import { UserChatWithId, UserGroupChatWithId, UserProps } from "@/types";
 import { getInitials } from "@/utils/helpers";
 import { Inbox, LucideIcon } from "lucide-react";
 import { FaHashtag, FaPaperPlane, FaUsers } from "react-icons/fa";
@@ -32,7 +32,7 @@ type Group = {
   
 };
 
-export function getMenuList(pathname: string, users: UserChatWithId[]): Group[] {
+export function getMenuList(pathname: string, users: UserChatWithId[], userChannels: UserGroupChatWithId[]): Group[] {
   return [
     {
       groupLabel: "",
@@ -65,40 +65,35 @@ export function getMenuList(pathname: string, users: UserChatWithId[]): Group[] 
               user
             };
           }),
-          // [
-          //   {
-          //     href: "/direct-messages/:id",
-          //     label: "Marvin",
-          //     active: pathname === "/direct-messages/:id",
-          //     icon: FaUser
-          //   },
-          //   {
-          //     href: "/direct-messages/:id",
-          //     label: "Mavis",
-          //     active: pathname === "/direct-messages/:id",
-          //     icon: FaUser
-          //   }
-          // ]
         },
         {
           href: "",
           label: "Channels",
           active: pathname.includes("/channels"),
           icon: FaUsers,
-          submenus: [
-            {
-              href: "/channels/:id",
-              label: "Marvin",
-              active: pathname === "/channels/:id",
+          submenus: userChannels?.map(({name, chatId}) => {
+            return {
+              href: `/channels/${chatId}`,
+              label: name as string,
+              active: pathname === `/channels/${chatId}`,
               icon: FaHashtag,
-            },
-            {
-              href: "/posts/new",
-              label: "Mavis",
-              active: pathname === "/channels/:id",
-              icon: FaHashtag,
-            },
-          ],
+              chatId
+            }
+          }) 
+          // [
+          //   {
+          //     href: "/channels/:id",
+          //     label: "Marvin",
+          //     active: pathname === "/channels/:id",
+          //     icon: FaHashtag,
+          //   },
+          //   {
+          //     href: "/posts/new",
+          //     label: "Mavis",
+          //     active: pathname === "/channels/:id",
+          //     icon: FaHashtag,
+          //   },
+          // ],
         },
       ],
     },

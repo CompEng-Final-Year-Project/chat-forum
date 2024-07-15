@@ -1,4 +1,10 @@
-import { Message, UserChat, UserChatWithId, UserProps } from "@/types";
+import {
+  Message,
+  UserChat,
+  UserChatWithId,
+  UserGroupChatWithId,
+  UserProps,
+} from "@/types";
 import { baseUrl, getRequest, postRequest } from "@/utils/services";
 import {
   createContext,
@@ -6,11 +12,15 @@ import {
   ReactNode,
   SetStateAction,
   useCallback,
+  useContext,
   useEffect,
+  // useRef,
   useState,
 } from "react";
 import { useAuth } from "./AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSocket } from "./SocketContext";
+// import { io, Socket } from "socket.io-client";
 
 interface ChatContextProps {
   createChat: (secondId: string) => Promise<void>;
@@ -23,8 +33,11 @@ interface ChatContextProps {
   sendTextMessage: (textMessage: string, currentChatId: string) => void;
   messages: Message[] | null;
   setChatId: Dispatch<SetStateAction<string>>;
-  chatId: string
+  chatId: string;
   loadingMessages: boolean;
+  userGroupChats: UserGroupChatWithId[] | null;
+  channel: UserGroupChatWithId | null;
+  sendTextMessageError: string
 }
 
 export const ChatContext = createContext<ChatContextProps>({
@@ -38,24 +51,38 @@ export const ChatContext = createContext<ChatContextProps>({
   sendTextMessage: () => {},
   messages: [],
   setChatId: () => null,
-  chatId: '',
+  chatId: "",
   loadingMessages: false,
+  userGroupChats: [],
+  channel: null,
+  sendTextMessageError: ''
 });
+
+export const useChat = () => {
+  return useContext(ChatContext)
+}
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [userChats, setUserChats] = useState<UserChatWithId[] | null>(null);
   const [recipientId, setRecipientId] = useState<string>(
     () => localStorage.getItem("recipientId") || ""
   );
+  const [userGroupChats, setUserGroupChats] = useState<
+    UserGroupChatWithId[] | null
+  >(null);
   const [selectedUser, setSelectedUser] = useState<UserProps | null>(null);
   const [potentialChats, setPotentialChats] = useState<UserProps[] | null>(
     null
   );
   const [messages, setMessages] = useState<Message[] | null>(null);
+  const [newMessage, setNewMessage] = useState<Message | null>(null);
+  const [sendTextMessageError, setSendTextMessageError] = useState("");
   const [chatId, setChatId] = useState<string>(
     () => localStorage.getItem("chatId") || ""
   );
   const [loadingMessages, setLoadingMessages] = useState<boolean>(false);
+  const [channel, setChannel] = useState<UserGroupChatWithId | null>(null);
+  const {socket} = useSocket()
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -67,19 +94,42 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     localStorage.setItem("recipientId", recipientId);
-    const userDetails = users.find(
+    const userDetails = users?.find(
       (userItem) => userItem._id.toString() === recipientId
     );
     setSelectedUser(userDetails || null);
   }, [recipientId, users]);
 
+  useEffect(() => {
+    if (socket === null) {
+      return;
+    }
+
+    socket?.emit("sendMessage", { ...newMessage, recipientId });
+  }, [newMessage]);
+
+  useEffect(() => {
+    if (socket === null) {
+      return;
+    }
+    socket?.on("getMessage", (message: Message) => {
+      if (message.sender !== recipientId) {
+        return
+      }
+      setMessages((prevMessages) => (prevMessages ? [...prevMessages, message] : [message]))
+    });
+
+    return () => {
+      socket.off("getMessage")
+    }
+  }, [socket, recipientId]);
+
   const getUserChats = useCallback(async () => {
     if (user?._id) {
       const response = await getRequest(`${baseUrl}/chats/`);
 
-      // console.log(response)
-
       const userChatsWithIds: UserChatWithId[] = response.chats
+        ?.filter((chat: UserChat) => chat.type === "direct")
         .map((chat: UserChat) => {
           const otherMemberId = chat.members.find(
             (memberId) => memberId !== user._id
@@ -87,50 +137,84 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           const userDetail = users.find(
             (userItem) => userItem._id.toString() === otherMemberId
           );
-          return userDetail ? { user: userDetail, chatId: chat._id, messages: chat.messages } : null;
+          return userDetail
+            ? { user: userDetail, chatId: chat._id, messages: chat.messages }
+            : null;
         })
         .filter(Boolean) as UserChatWithId[];
 
-      // const userChatIds = response.chats.flatMap((chat: UserChat) =>
-      //   chat.members.filter((memberId) => memberId !== user._id)
-      // ) as string[]
-      // const chatUsers = users.filter((userItem) =>
-      //   userChatIds.includes(userItem._id.toString())
-      // );
-      // const potentialChatsUsers = users.filter((userItem) =>
-      //   !userChatIds.includes(userItem._id.toString())
-      // );
+      const userGroupChatsWithIds: UserGroupChatWithId[] = response.chats
+        ?.filter((chat: UserChat) => chat.type === "course")
+        .map((chat: UserChat) => {
+          const otherMembersId = chat.members.filter(
+            (memberId) => memberId !== user._id
+          );
+          const userDetails = otherMembersId
+            .map((memberId) =>
+              users.find(
+                (userItem) => userItem._id.toString() === memberId.toString()
+              )
+            )
+            .filter(Boolean) as UserProps[];
+          return userDetails.length > 0
+            ? {
+                users: userDetails,
+                chatId: chat._id,
+                messages: chat.messages,
+                name: chat.name,
+              }
+            : null;
+        })
+        .filter(Boolean) as UserGroupChatWithId[];
 
-      const userChatIds = userChatsWithIds.map((chat) => {
+      const userChatIds = userChatsWithIds?.map((chat) => {
         return chat.user._id;
       });
-      const potentialChatsUsers = users.filter(
+      const potentialChatsUsers = users?.filter(
         (userItem) => !userChatIds.includes(userItem._id.toString())
       );
       setUserChats(userChatsWithIds);
       setPotentialChats(potentialChatsUsers);
+      setUserGroupChats(userGroupChatsWithIds);
     }
   }, [users, user]);
 
   useEffect(() => {
     const getMessages = async () => {
-      try{
-        setLoadingMessages(true)
+      try {
+        setLoadingMessages(true);
         const response = await getRequest(`${baseUrl}/chats/`);
-        const chat = response.chats.find((chat: UserChat) => chat._id === chatId)?.messages
-        setMessages(chat);
-        setLoadingMessages(false)
-      }catch(error){
-        console.log(error)
-        setLoadingMessages(false)
+        const chat = response.chats?.find(
+          (chat: UserChat) => chat._id === chatId
+        );
+        if (chat.type === "course") {
+          const userDetails = chat.members
+            .map((memberId: string) =>
+              users.find((userItem) => userItem._id.toString() === memberId)
+            )
+            .filter(Boolean) as UserProps[];
+          setChannel({
+            users: userDetails,
+            chatId: chat._id,
+            messages: chat.messages,
+            name: chat.name,
+          });
+        }
+        setMessages(chat?.messages);
+        setLoadingMessages(false);
+      } catch (error) {
+        console.log(error);
+        setLoadingMessages(false);
       }
-    }
-    getMessages()
-  }, [chatId])
+    };
+    getMessages();
+  }, [chatId, users]);
 
   const createChat = useCallback(
     async (secondId: string) => {
-      const response = await postRequest(`${baseUrl}/chats/${secondId}`);
+      const response = await postRequest(
+        `${baseUrl}/chats/create-direct-chat/${secondId}`
+      );
       if (response.error) {
         return console.log("Error creating chat", response);
       }
@@ -142,7 +226,23 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       await getUserChats();
     },
     [getUserChats]
-  ); 
+  );
+
+  const manageCourseChats = useCallback(async () => {
+    const response = await postRequest(`${baseUrl}/chats/manage-course-chats`);
+
+    if (response.error) {
+      return console.log("Error managing group chats", response);
+    }
+
+    await getUserChats();
+  }, [getUserChats]);
+
+  useEffect(() => {
+    if (user) {
+      manageCourseChats();
+    }
+  }, [user, manageCourseChats]);
 
   useEffect(() => {
     getUserChats();
@@ -155,26 +255,45 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [pathname]);
 
-  const sendTextMessage = useCallback(async (textMessage: string, currentChatId: string) => {
-    try {
-      const newMessage = {
-        chatId: currentChatId,
-        sender: user?._id as string,
-        text: textMessage,
-        createdAt: new Date(),
-      };
+  const sendTextMessage = useCallback(
+    async (textMessage: string, currentChatId: string) => {
+      try {
+        const sentMessage = {
+          chatId: currentChatId,
+          sender: user?._id as string,
+          text: textMessage,
+          createdAt: new Date(),
+        };
 
-      await postRequest(`${baseUrl}/message/send-message`, JSON.stringify(newMessage))
+        const response = await postRequest(
+          `${baseUrl}/message/send-message`,
+          JSON.stringify(sentMessage)
+        );
 
+        if (response.error) {
+          return setSendTextMessageError(response.message);
+        }
 
-      setMessages((prev: Message[] | null) =>
-        prev ? [...prev, newMessage] : [newMessage]
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
+        const newText =
+          response.chat.messages[response.chat.messages.length - 1];
 
+        const newMessage = {
+          chatId: response.chat._id,
+          sender: newText.sender,
+          text: newText.text,
+          createdAt: newText.createdAt,
+        };
+
+        setNewMessage(newMessage);
+        setMessages((prev: Message[] | null) =>
+          prev ? [...prev, newMessage] : [newMessage]
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    []
+  );
 
   const value: ChatContextProps = {
     createChat,
@@ -187,8 +306,11 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     sendTextMessage,
     messages,
     setChatId,
-    chatId, 
+    chatId,
     loadingMessages,
+    userGroupChats,
+    channel,
+    sendTextMessageError
   };
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };

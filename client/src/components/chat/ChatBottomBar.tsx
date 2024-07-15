@@ -1,45 +1,33 @@
 import { FileImage, Mic, Paperclip, SendHorizontal } from "lucide-react";
-import React, { useContext, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { EmojiPicker } from "../EmojiPicker";
 
-import { Input } from "../ui/input";
-import { ChatContext } from "@/contexts/ChatContext";
+import { useChat } from "@/contexts/ChatContext";
 
 const ChatBottomBar = () => {
   const [message, setMessage] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { sendTextMessage, chatId } = useContext(ChatContext);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { sendTextMessage, chatId } = useChat();
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(event.target.value);
   };
-
-  //   const handleThumbsUp = () => {
-  //     const newMessage: Message = {
-  //       id: message.length + 1,
-  //       name: loggedInUserData.name,
-  //       avatar: loggedInUserData.avatar,
-  //       message: "👍",
-  //     };
-  //     sendMessage(newMessage);
-  //     setMessage("");
-  //   };
 
   const handleSend = () => {
     if (message.trim()) {
       sendTextMessage(message.trim(), chatId);
       setMessage("");
 
-      if (inputRef.current) {
-        inputRef.current.focus();
+      if (textareaRef.current) {
+        textareaRef.current.focus();
       }
     }
   };
 
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       handleSend();
@@ -51,9 +39,21 @@ const ChatBottomBar = () => {
     }
   };
 
+  const autoResizeTextarea = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"; // Reset height to auto
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Set height to scrollHeight
+      
+    }
+  };
+
+  useEffect(() => {
+    autoResizeTextarea();
+  }, [message]);
+
   return (
     <div className="p-2  flex justify-between w-full items-center gap-2">
-      <div className="flex">
+      <div className="flex items-end h-full">
         <Button
           variant={"ghost"}
           size={"icon"}
@@ -83,27 +83,34 @@ const ChatBottomBar = () => {
             },
           }}
         >
-          <Input
+          <textarea
             autoComplete="off"
             value={message}
-            ref={inputRef}
+            ref={textareaRef}
             onKeyDown={handleKeyPress}
             onChange={handleInputChange}
             name="message"
             placeholder="Message"
-            className=" w-full border rounded-full flex items-center h-9 resize-none overflow-hidden bg-background"
+            className={cn(
+              "w-full border flex items-center resize-none overflow-y-auto bg-background p-2 max-h-[10rem]  ",
+              "rounded-t-lg" 
+            )}
+            rows={1} // Initial number of rows
+            // style={{ height: "auto", overflow: "hidden" }}
           />
           <div className="absolute right-2 bottom-0.5  ">
             <EmojiPicker
               onChange={(value) => {
                 setMessage(message + value);
-                if (inputRef.current) {
-                  inputRef.current.focus();
+                if (textareaRef.current) {
+                  textareaRef.current.focus();
                 }
               }}
             />
           </div>
         </motion.div>
+
+            <div className="flex items-end h-full">
 
         {message.trim() ? (
           <Button
@@ -143,6 +150,7 @@ const ChatBottomBar = () => {
           </div>
           //   )}
         )}
+          </div>
       </AnimatePresence>
     </div>
   );

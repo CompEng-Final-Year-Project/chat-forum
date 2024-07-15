@@ -7,7 +7,7 @@ export const getUsers = async (req: Request, res: Response) => {
   try {
     const currentUser = req.user as IUser;
     const allUsers = await User.find({ _id: { $ne: currentUser?._id } })
-      .select("id firstName lastName indexNumber courses")
+      .select("id firstName lastName indexNumber courses role")
       .exec();
 
     const currentUserCourseIds = currentUser?.courses?.map(

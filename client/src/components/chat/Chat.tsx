@@ -1,17 +1,16 @@
 // import { Message, UserData } from "@/assets/data";
 import ChatTopBar from "./ChatTopBar";
 import { ChatList } from "./ChatList";
-import  { useContext } from "react";
 import { Message } from "@/types";
-import { ChatContext } from "@/contexts/ChatContext";
+import { useChat } from "@/contexts/ChatContext";
 
 
-export function Chat() {
-  const {messages} = useContext(ChatContext)
+export function Chat({type}: {type: "direct" | "course"}) {
+  const {messages} = useChat()
 
   return (
     <div className="flex flex-col justify-between w-full h-full">
-      <ChatTopBar />
+      <ChatTopBar type={type} />
 
       <ChatList
         messages={messages as Message[]}
