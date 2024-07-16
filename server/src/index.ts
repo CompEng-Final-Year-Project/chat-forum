@@ -19,6 +19,10 @@ routes(app);
 connectDB();
 prod(app);
 
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
 const port = process.env.PORT || 5000;
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
