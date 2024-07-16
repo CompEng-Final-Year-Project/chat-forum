@@ -12,15 +12,15 @@ if(!mongoDBUri) {
 export const logger = createLogger({
     transports: [
         new transports.Console(),
-        new transports.File({filename: './src/logs/logger.log'}),
+        new transports.File({filename: 'logger.log'}),
         new MongoDB({db: mongoDBUri, level: 'error', options: {useUnifiedTopology: true}})
     ],
     exceptionHandlers: [
         new transports.Console(),
-        new transports.File({filename: './src/logs/exceptions.log'}),
+        new transports.File({filename: 'exceptions.log'}),
     ],
     rejectionHandlers: [
         new transports.Console(),
-        new transports.File({filename: './src/logs/exceptions.log'}),
+        new transports.File({filename: 'exceptions.log'}),
     ]
 })
