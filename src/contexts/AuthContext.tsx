@@ -62,7 +62,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await postRequest(url, body);
       const token = Cookies.get("token");
-      console.log(token)
       if (token) {
         const decoded = jwtDecode(token);
         sessionStorage.setItem("user", JSON.stringify(decoded));
@@ -83,7 +82,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  console.log(user)
 
   const logout = useCallback(async () => {
     Cookies.remove("token");

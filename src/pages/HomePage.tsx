@@ -12,10 +12,8 @@ const HomePage = () => {
       <div className="max-md:hidden">
         <Sidebar />
       </div>
-      <div className="md:hidden">
-        <SheetSideBar />
-      </div>
-      <div className="overflow-y-auto w-full">
+      
+      <div className=" w-full">
         <Routes>
           <Route path="/general-feed" element={<Dashboard />} />
           <Route

@@ -1,5 +1,6 @@
 import CreatePostCard from "@/components/CreatePostCard";
 import NewPost from "@/components/NewPostBox";
+import SheetSideBar from "@/components/SheetSideBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,10 @@ const Dashboard = () => {
   );
 
   return (
+    <>
+      <div className="md:hidden ">
+          <SheetSideBar />
+        </div>
     <div className="flex-1 p-4 bg-muted/10">
       <div className="mb-10 max-w-2xl mx-auto">
         {showCard && <CreatePostCard setShowCard={setShowCard} extra={extra} setExtra={setExtra} />}
@@ -121,6 +126,7 @@ const Dashboard = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

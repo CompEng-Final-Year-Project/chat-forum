@@ -12,8 +12,9 @@ import { Button } from "../ui/button";
 import { RecipientInfoCard } from "../RecipientInfoCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { Skeleton } from "../ui/skeleton";
+import SheetSideBar from "../SheetSideBar";
 
-export default function ChatTopBar({type}: {type: "direct" | "course"}) {
+export default function ChatTopBar({ type }: { type: "direct" | "course" }) {
   const { user } = useAuth();
   const { selectedUser, channel } = useChat();
   const [showInfoCard, setShowInfoCard] = useState(false);
@@ -50,94 +51,100 @@ export default function ChatTopBar({type}: {type: "direct" | "course"}) {
     selectedUser?.lastName as string
   );
   return (
-    <div className="relative ">
-      <div className="w-full overflow-hidden h-20 flex p-4 justify-between items-center border-b">
-        {type === "direct" ? (
-          <>
-            {!selectedUser ? (
-              <div className="flex items-center space-x-4">
-                <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-[200px] bg-neutral-200" />
-                  <Skeleton className="h-4 w-[150px] bg-neutral-200" />
+    <div className="border-b shadow-sm">
+      <div className="flex flex-row justify-center items-center md:px-4 max-sm:pe-4">
+        <div className="md:hidden">
+          <SheetSideBar />
+        </div>
+        <div className="w-full overflow-hidden h-20 flex justify-between items-center ">
+          {type === "direct" ? (
+            <>
+              {!selectedUser ? (
+                <div className="flex items-center space-x-4">
+                  <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[200px] bg-neutral-200" />
+                    <Skeleton className="h-4 w-[150px] bg-neutral-200" />
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Avatar className="flex justify-center items-center">
-                  {/* <AvatarImage
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Avatar className="flex justify-center items-center">
+                    {/* <AvatarImage
             src={selectedUser?.avatar}
             alt={selectedUser?.firstName}
             width={6}
             height={6}
             className="w-10 h-10 "
             /> */}
-                  <AvatarFallback>{initials}</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <span className="font-medium">{`${selectedUser?.firstName} ${selectedUser?.lastName}`}</span>
-                  <span className="text-xs">Active 2 mins ago</span>
+                    <AvatarFallback>{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{`${selectedUser?.firstName} ${selectedUser?.lastName}`}</span>
+                    <span className="text-xs">Active 2 mins ago</span>
+                  </div>
                 </div>
-              </div>
-            )}
-          </>
-        ) : (
-          <>
-          {!channel ? (
-              <div className="flex items-center space-x-4">
-                <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-[200px] bg-neutral-200" />
-                  <Skeleton className="h-4 w-[150px] bg-neutral-200" />
+              )}
+            </>
+          ) : (
+            <>
+              {!channel ? (
+                <div className="flex items-center space-x-4">
+                  <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[200px] bg-neutral-200" />
+                    <Skeleton className="h-4 w-[150px] bg-neutral-200" />
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Avatar className="flex justify-center items-center">
-                  
-                  <AvatarFallback><HashIcon/></AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <span className="font-medium">{channel.name}</span>
-                  <span className="text-xs">Active 2 mins ago</span>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Avatar className="flex justify-center items-center">
+                    <AvatarFallback>
+                      <HashIcon />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{channel.name}</span>
+                    <span className="text-xs">Active 2 mins ago</span>
+                  </div>
                 </div>
-              </div>
-            )}
-          </>
-        )}
+              )}
+            </>
+          )}
 
-        <div className="">
-          <Button
-            onClick={toggleCard}
-            variant={"ghost"}
-            size={"icon"}
-            className={cn(
-              "h-9 w-9",
-              "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
-            )}
-          >
-            <Info size={20} className="text-muted-foreground" />
-          </Button>
+          <div className="">
+            <Button
+              onClick={toggleCard}
+              variant={"ghost"}
+              size={"icon"}
+              className={cn(
+                "h-9 w-9",
+                "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
+              )}
+            >
+              <Info size={20} className="text-muted-foreground" />
+            </Button>
+          </div>
         </div>
+        <AnimatePresence></AnimatePresence>
+        {showInfoCard && (
+          <motion.div
+            ref={infoCardRef}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="fixed right-[20px] top-16 z-30"
+          >
+            <RecipientInfoCard
+              user={selectedUser as UserProps}
+              sharedCourses={sharedCourses as { _id: string; name: string }[]}
+              type={type}
+              channel={channel!}
+            />
+          </motion.div>
+        )}
       </div>
-      <AnimatePresence></AnimatePresence>
-      {showInfoCard && (
-        <motion.div
-          ref={infoCardRef}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
-          className="fixed right-[20px] top-16 z-30"
-        >
-          <RecipientInfoCard
-            user={selectedUser as UserProps}
-            sharedCourses={sharedCourses as { _id: string; name: string }[]}
-            type={type}
-            channel={channel!}
-          />
-        </motion.div>
-      )}
     </div>
   );
 }

@@ -130,9 +130,9 @@ export function CollapseMenuButton({
                 },
                 index
               ) => (
-                <TooltipProvider key={index} disableHoverableContent>
-                  <Tooltip delayDuration={100}>
-                    <TooltipTrigger >
+                <TooltipProvider  key={index} disableHoverableContent>
+                  <Tooltip  delayDuration={100}>
+                    <TooltipTrigger className="w-full" >
                       <Button
                         key={index}
                         variant={active ? "secondary" : "ghost"}
@@ -148,7 +148,7 @@ export function CollapseMenuButton({
                           }
                         }}
                       >
-                        <Link to={href}>
+                        <Link to={href} className="w-full">
                           <span className="mr-4 ml-2">
                             {initials ? (
                               <Avatar className="flex justify-center items-center">
@@ -162,8 +162,7 @@ export function CollapseMenuButton({
                           </span>
                           <p
                             className={cn(
-                              "max-w-[100px] truncate",
-                              isOpen
+                              "max-w-[100px] truncate",                              isOpen
                                 ? "translate-x-0 opacity-100"
                                 : "-translate-x-96 opacity-0"
                             )}

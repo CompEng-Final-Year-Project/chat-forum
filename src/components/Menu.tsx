@@ -1,4 +1,4 @@
-import { Ellipsis, LogOut } from "lucide-react";
+import { Ellipsis } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getMenuList } from "@/lib/menu-list";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/tooltip";
 import { Link, useLocation } from "react-router-dom";
 import { CollapseMenuButton } from "./CollapseMenuButton";
-import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import { UserChatWithId, UserGroupChatWithId } from "@/types";
 
@@ -21,14 +20,13 @@ interface MenuProps {
 
 export function Menu({ isOpen }: MenuProps) {
   const { pathname } = useLocation();
-  const { logout } = useAuth();
   const { createChat, userChats, potentialChats, userGroupChats } = useChat();
   const menuList = getMenuList(pathname, userChats as UserChatWithId[], userGroupChats as UserGroupChatWithId[]);
 
   return (
-    <ScrollArea className="[&>div>div[style]]:!block">
-      <nav className="h-full w-full md:mt-5">
-        <ul className="flex flex-col min-h-[calc(100vh-48px-36px-16px-32px)] lg:min-h-[calc(100vh-32px-40px-32px)] items-start space-y-1 px-2">
+    <ScrollArea className="[&>div>div[style]]:!block h-full">
+      <nav className="justify-between flex flex-col w-full md:mt-5">
+        <ul className="flex flex-col h-full  items-start space-y-1 px-2">
           {menuList?.map(({ groupLabel, menus }, index) => (
             <li className={cn("w-full", groupLabel ? "pt-5" : "")} key={index}>
               {(isOpen && groupLabel) || isOpen === undefined ? (
@@ -151,37 +149,8 @@ export function Menu({ isOpen }: MenuProps) {
             </li>
           )}
 
-          <li className="w-full grow flex items-end">
-            <TooltipProvider disableHoverableContent>
-              <Tooltip delayDuration={100}>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => {
-                      logout();
-                    }}
-                    variant="outline"
-                    className="w-full justify-center h-10 mt-5"
-                  >
-                    <span className={cn(isOpen === false ? "" : "mr-4")}>
-                      <LogOut size={18} />
-                    </span>
-                    <p
-                      className={cn(
-                        "whitespace-nowrap",
-                        isOpen === false ? "opacity-0 hidden" : "opacity-100"
-                      )}
-                    >
-                      Sign out
-                    </p>
-                  </Button>
-                </TooltipTrigger>
-                {isOpen === false && (
-                  <TooltipContent side="right">Sign out</TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
-          </li>
         </ul>
+          
       </nav>
     </ScrollArea>
   );

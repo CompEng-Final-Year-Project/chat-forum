@@ -32,7 +32,8 @@ export function ChatList({ messages }: ChatListProps) {
   }, [messages]);
 
   return (
-    <div className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col">
+    <div className="w-full overflow-y-hidden overflow-x-hidden h-full flex flex-col">
+      
       {loadingMessages ? (
         <div className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col justify-center">
           <Spinner />
