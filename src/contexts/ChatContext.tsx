@@ -19,7 +19,7 @@ import {
 } from "react";
 import { useAuth } from "./AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useSocket } from "./SocketContext";
+// import { useSocket } from "./SocketContext";
 // import { io, Socket } from "socket.io-client";
 
 interface ChatContextProps {
@@ -75,14 +75,14 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     null
   );
   const [messages, setMessages] = useState<Message[] | null>(null);
-  const [newMessage, setNewMessage] = useState<Message | null>(null);
+  // const [newMessage, setNewMessage] = useState<Message | null>(null);
   const [sendTextMessageError, setSendTextMessageError] = useState("");
   const [chatId, setChatId] = useState<string>(
     () => localStorage.getItem("chatId") || ""
   );
   const [loadingMessages, setLoadingMessages] = useState<boolean>(false);
   const [channel, setChannel] = useState<UserGroupChatWithId | null>(null);
-  const {socket} = useSocket()
+  // const {socket} = useSocket()
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -100,29 +100,29 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     setSelectedUser(userDetails || null);
   }, [recipientId, users]);
 
-  useEffect(() => {
-    if (socket === null) {
-      return;
-    }
+  // useEffect(() => {
+  //   if (socket === null) {
+  //     return;
+  //   }
 
-    socket?.emit("sendMessage", { ...newMessage, recipientId });
-  }, [newMessage]);
+  //   socket?.emit("sendMessage", { ...newMessage, recipientId });
+  // }, [newMessage]);
 
-  useEffect(() => {
-    if (socket === null) {
-      return;
-    }
-    socket?.on("getMessage", (message: Message) => {
-      if (message.sender !== recipientId) {
-        return
-      }
-      setMessages((prevMessages) => (prevMessages ? [...prevMessages, message] : [message]))
-    });
+  // useEffect(() => {
+  //   if (socket === null) {
+  //     return;
+  //   }
+  //   socket?.on("getMessage", (message: Message) => {
+  //     if (message.sender !== recipientId) {
+  //       return
+  //     }
+  //     setMessages((prevMessages) => (prevMessages ? [...prevMessages, message] : [message]))
+  //   });
 
-    return () => {
-      socket.off("getMessage")
-    }
-  }, [socket, recipientId]);
+  //   return () => {
+  //     socket.off("getMessage")
+  //   }
+  // }, [socket, recipientId]);
 
   const getUserChats = useCallback(async () => {
     if (user?._id) {
@@ -284,7 +284,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           createdAt: newText.createdAt,
         };
 
-        setNewMessage(newMessage);
+        // setNewMessage(newMessage);
         setMessages((prev: Message[] | null) =>
           prev ? [...prev, newMessage] : [newMessage]
         );
