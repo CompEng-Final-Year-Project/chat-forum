@@ -52,6 +52,7 @@ const SignIn = () => {
         });
         return;
       }
+      console.log(response)
       toast({
         description: response.message,
         color: "green",

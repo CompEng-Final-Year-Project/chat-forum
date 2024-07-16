@@ -187,7 +187,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         const chat = response.chats?.find(
           (chat: UserChat) => chat._id === chatId
         );
-        if (chat.type === "course") {
+        if (chat?.type === "course") {
           const userDetails = chat.members
             .map((memberId: string) =>
               users.find((userItem) => userItem._id.toString() === memberId)

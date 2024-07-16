@@ -24,27 +24,27 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUsers[]>([]);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (!socket) {
-      const socket = io("http://localhost:5000", {
-        query: { userId: user?._id },
-      });
-      setSocket(socket);
+  // useEffect(() => {
+  //   if (!socket) {
+  //     const socket = io(import.meta.env.VITE_BASEURL, {
+  //       query: { userId: user?._id },
+  //     });
+  //     setSocket(socket);
 
-      socket.on("connect_error", (error) => {
-        console.error("Connection error:", error);
-      });
+  //     socket.on("connect_error", (error) => {
+  //       console.error("Connection error:", error);
+  //     });
 
-      socket.on("getOnlineUsers", (users: OnlineUsers[]) => {
-        setOnlineUsers(users);
-      });
+  //     socket.on("getOnlineUsers", (users: OnlineUsers[]) => {
+  //       setOnlineUsers(users);
+  //     });
 
-      return () => {
-        socket.close();
-        setSocket(null);
-      };
-    }
-  }, []);
+  //     return () => {
+  //       socket.close();
+  //       setSocket(null);
+  //     };
+  //   }
+  // }, []);
 
   const value = { socket, onlineUsers };
 
