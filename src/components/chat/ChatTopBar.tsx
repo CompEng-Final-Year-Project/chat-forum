@@ -80,7 +80,7 @@ export default function ChatTopBar({ type }: { type: "direct" | "course" }) {
                     <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
-                    <span className="font-medium">{`${selectedUser?.firstName} ${selectedUser?.lastName}`}</span>
+                    <span className="font-medium max-sm:w-[8.5rem] truncate">{`${selectedUser?.firstName} ${selectedUser?.lastName}`}</span>
                     <span className="text-xs">Active 2 mins ago</span>
                   </div>
                 </div>
@@ -104,7 +104,7 @@ export default function ChatTopBar({ type }: { type: "direct" | "course" }) {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
-                    <span className="font-medium">{channel.name}</span>
+                    <span className="font-medium max-sm:w-[8.5rem] truncate">{channel.name}</span>
                     <span className="text-xs">Active 2 mins ago</span>
                   </div>
                 </div>

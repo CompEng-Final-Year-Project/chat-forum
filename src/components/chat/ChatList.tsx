@@ -105,8 +105,12 @@ export function ChatList({ messages }: ChatListProps) {
                         )}
                       </>
                     )}
-                    <div className=" flex flex-col space-x-1">
-                      <span className=" bg-accent p-3 rounded-md max-w-xs ">
+                    <div className=" flex flex-col space-y-1">
+                      <span className={`${
+                          message.sender === user?._id
+                            ? "bg-green-500 text-accent"
+                            : "bg-accent"}
+                              p-2 rounded-lg max-w-xs shadow-sm shadow-neutral-400 text-sm w-fit`}>
                         {message.text}
                       </span>
                       <span
@@ -122,7 +126,7 @@ export function ChatList({ messages }: ChatListProps) {
                     {message.sender === user?._id && (
                       <>
                         {user.role !== "student" ? (
-                          <div className="relative inline-block">
+                          <div className="relative self-start inline-block">
                             <Avatar
                               className={`w-12 h-12 border-solid border-4 border-primary"  `}
                             >

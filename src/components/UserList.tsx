@@ -37,7 +37,7 @@ export function UserList({ users }: UserListProps) {
         onChange={(e) => setSearch(e.target.value)}
         className="w-full p-2 border rounded mb-4"
       />
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {filteredUsers.map((user, index) => (
           <TooltipProvider key={index} disableHoverableContent>
             <Tooltip delayDuration={100}>

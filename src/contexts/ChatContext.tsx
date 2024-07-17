@@ -20,7 +20,7 @@ import {
 import { useAuth } from "./AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSocket } from "./SocketContext";
-import { io, Socket } from "socket.io-client";
+// import { io, Socket } from "socket.io-client";
 
 interface ChatContextProps {
   createChat: (secondId: string) => Promise<void>;
@@ -183,6 +183,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const getMessages = async () => {
       try {
         setLoadingMessages(true);
+        if(!user) return
         const response = await getRequest(`${baseUrl}/chats/`);
         const chat = response.chats?.find(
           (chat: UserChat) => chat._id === chatId

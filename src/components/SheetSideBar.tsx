@@ -14,7 +14,7 @@ const SheetSideBar = () => {
   const { logout } = useAuth();
   return (
     <Sheet>
-      <SheetTrigger className="lg:hidden mx-[24px] mt-[20px]" asChild>
+      <SheetTrigger className="lg:hidden ms-6 me-2" asChild>
         <Button className="h-8 " variant="outline" size="icon">
           <MenuIcon size={20} />
         </Button>

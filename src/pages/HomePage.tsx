@@ -1,7 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import Dashboard from "./Dashboard";
 import Sidebar from "@/components/Sidebar";
-import SheetSideBar from "@/components/SheetSideBar";
 import useAuthMiddleware from "@/hooks/useAuthMiddleware";
 import { ChatLayout } from "@/components/chat/ChatLayout";
 
