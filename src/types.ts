@@ -25,6 +25,7 @@ export interface Message {
   text: string;
   sender: string;
   createdAt: Date;
+  courseId?: string
 }
 
 export interface User {
@@ -40,6 +41,7 @@ export interface UserChat{
   messages: Message[]
   type: "direct" | "course"
   name?: string
+  courses: string[]
 }
 
 export interface UserChatWithId {
@@ -52,4 +54,5 @@ export interface UserGroupChatWithId {
   chatId: string;
   messages: Message[];
   name: string;
+  courses: string[]
 }

@@ -26,10 +26,15 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!socket && user) {
+      if (!user?._id) {
+        console.error("User ID is missing.");
+        return;
+      }
       const socket = io(import.meta.env.VITE_BASEURL, {
-        query: { userId: user?._id },
+        query: { userId: user?._id }, transports: ["websocket"],
       });
       setSocket(socket);
+      // console.log(socket)
 
       socket.on("connect_error", (error) => {
         console.error("Connection error:", error);

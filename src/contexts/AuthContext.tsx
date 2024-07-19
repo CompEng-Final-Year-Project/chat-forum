@@ -61,9 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = useCallback(async (url: string, body: BodyInit) => {
     try {
       const response = await postRequest(url, body);
-      console.log(response)
       const {token} = response
-            console.log(token)
       if (token) {
         const decoded = jwtDecode(token);
         sessionStorage.setItem("user", JSON.stringify(decoded));

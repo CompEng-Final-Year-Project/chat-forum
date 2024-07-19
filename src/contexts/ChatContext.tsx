@@ -14,13 +14,11 @@ import {
   useCallback,
   useContext,
   useEffect,
-  // useRef,
   useState,
 } from "react";
 import { useAuth } from "./AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSocket } from "./SocketContext";
-// import { io, Socket } from "socket.io-client";
 
 interface ChatContextProps {
   createChat: (secondId: string) => Promise<void>;
@@ -37,7 +35,7 @@ interface ChatContextProps {
   loadingMessages: boolean;
   userGroupChats: UserGroupChatWithId[] | null;
   channel: UserGroupChatWithId | null;
-  sendTextMessageError: string
+  sendTextMessageError: string;
 }
 
 export const ChatContext = createContext<ChatContextProps>({
@@ -55,12 +53,12 @@ export const ChatContext = createContext<ChatContextProps>({
   loadingMessages: false,
   userGroupChats: [],
   channel: null,
-  sendTextMessageError: ''
+  sendTextMessageError: "",
 });
 
 export const useChat = () => {
-  return useContext(ChatContext)
-}
+  return useContext(ChatContext);
+};
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [userChats, setUserChats] = useState<UserChatWithId[] | null>(null);
@@ -82,7 +80,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   );
   const [loadingMessages, setLoadingMessages] = useState<boolean>(false);
   const [channel, setChannel] = useState<UserGroupChatWithId | null>(null);
-  const {socket} = useSocket()
+  const { socket } = useSocket();
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -104,8 +102,14 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     if (socket === null) {
       return;
     }
-
-    socket?.emit("sendMessage", { ...newMessage, recipientId });
+    console.log(newMessage)
+    if (newMessage?.courseId) {
+      socket.emit("sendGroupMessage", {
+        ...newMessage
+      });
+    } else {
+      socket?.emit("sendMessage", { ...newMessage, recipientId });
+    }
   }, [newMessage]);
 
   useEffect(() => {
@@ -114,14 +118,22 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     }
     socket?.on("getMessage", (message: Message) => {
       if (message.sender !== recipientId) {
+        return;
+      }
+      setMessages((prevMessages) =>
+        prevMessages ? [...prevMessages, message] : [message]
+      );
+    });
+    socket.on("getGroupMessage", (message) => {
+      if (user?._id === message.sender) {
         return
       }
-      setMessages((prevMessages) => (prevMessages ? [...prevMessages, message] : [message]))
+      setMessages((prevMessages) => (prevMessages? [...prevMessages, message] : [message]))
     });
 
     return () => {
-      socket.off("getMessage")
-    }
+      socket.off("getMessage");
+    };
   }, [socket, recipientId]);
 
   const getUserChats = useCallback(async () => {
@@ -134,7 +146,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           const otherMemberId = chat.members.find(
             (memberId) => memberId !== user._id
           );
-          const userDetail = users.find(
+          const userDetail = users?.find(
             (userItem) => userItem._id.toString() === otherMemberId
           );
           return userDetail
@@ -149,6 +161,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           const otherMembersId = chat.members.filter(
             (memberId) => memberId !== user._id
           );
+          const courseId = chat.courses[0]
           const userDetails = otherMembersId
             .map((memberId) =>
               users.find(
@@ -162,6 +175,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
                 chatId: chat._id,
                 messages: chat.messages,
                 name: chat.name,
+                courseId
               }
             : null;
         })
@@ -183,7 +197,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const getMessages = async () => {
       try {
         setLoadingMessages(true);
-        if(!user) return
+        if (!user) {return}
         const response = await getRequest(`${baseUrl}/chats/`);
         const chat = response.chats?.find(
           (chat: UserChat) => chat._id === chatId
@@ -199,6 +213,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             chatId: chat._id,
             messages: chat.messages,
             name: chat.name,
+            courses: chat.courses
           });
         }
         setMessages(chat?.messages);
@@ -283,6 +298,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           sender: newText.sender,
           text: newText.text,
           createdAt: newText.createdAt,
+          courseId: response.chat.type === "course" && response.chat.courses[0]
         };
 
         setNewMessage(newMessage);
@@ -311,7 +327,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     loadingMessages,
     userGroupChats,
     channel,
-    sendTextMessageError
+    sendTextMessageError,
   };
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };

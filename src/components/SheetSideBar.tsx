@@ -3,6 +3,8 @@ import {
   SheetContent,
   SheetHeader,
   SheetTrigger,
+  SheetTitle,
+  SheetDescription,
 } from "./ui/sheet";
 import { Button } from "./ui/button";
 import { LogOut, MenuIcon } from "lucide-react";
@@ -24,14 +26,19 @@ const SheetSideBar = () => {
         side="left"
       >
         <SheetHeader>
-          <div className="flex items-center gap-2 mb-4">
-            <img
-              src={uenrLogo}
-              alt="University Chat Forum"
-              className="h-8 w-auto"
-            />
-            <h2 className="text-lg font-semibold">Chat Forum</h2>
-          </div>
+          <SheetTitle>
+            <div className="flex items-center gap-2 mb-4">
+              <img
+                src={uenrLogo}
+                alt="University Chat Forum"
+                className="h-8 w-auto"
+              />
+              <h2 className="text-lg font-semibold">Chat Forum</h2>
+            </div>
+          </SheetTitle>
+          <SheetDescription>
+            {/* Sidebar menu for navigation and user actions. */}
+          </SheetDescription>
         </SheetHeader>
         <div className="flex-grow">
             <Menu isOpen />

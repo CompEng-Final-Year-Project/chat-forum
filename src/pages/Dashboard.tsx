@@ -21,7 +21,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="md:hidden ">
+      <div className="md:hidden mt-[20px]">
           <SheetSideBar />
         </div>
     <div className="flex-1 p-4 bg-muted/10">
