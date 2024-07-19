@@ -40,7 +40,6 @@ const ForgotPassword = () => {
         `${baseUrl}/auth/forgot-password`,
         JSON.stringify(data)
       );
-      console.log(response);
       setLoading(false);
       if (response.error) {
         toast({

@@ -28,6 +28,7 @@ import { useChat } from "@/contexts/ChatContext";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { UserProps } from "@/types";
 import { Skeleton } from "./ui/skeleton";
+import { useSocket } from "@/contexts/SocketContext";
 
 type Submenu = {
   href: string;
@@ -55,8 +56,8 @@ export function CollapseMenuButton({
   submenus,
   isOpen,
 }: CollapseMenuButtonProps) {
-  const { setRecipientId, setChatId, setSelectedUser } =
-    useChat();
+  const { setRecipientId, setChatId, setSelectedUser } = useChat();
+  const { onlineUsers } = useSocket();
 
   return isOpen ? (
     <Collapsible
@@ -129,59 +130,64 @@ export function CollapseMenuButton({
                   user,
                 },
                 index
-              ) => (
-                <TooltipProvider  key={index} disableHoverableContent>
-                  <Tooltip  delayDuration={100}>
-                    <TooltipTrigger className="w-full" >
-                      <Button
-                        key={index}
-                        variant={active ? "secondary" : "ghost"}
-                        className="w-full justify-start h-10 mb-1 text-gray-600"
-                        asChild
-                        onClick={() => {
-                          setRecipientId(recipientId as string);
-                          if (chatId) {
-                            setChatId(chatId);
-                          }
-                          if (user) {
-                            setSelectedUser(user);
-                          }
-                        }}
-                      >
-                        <Link to={href} className="w-full">
-                          <span className="mr-4 ml-2">
-                            {initials ? (
-                              <Avatar className="flex justify-center items-center">
-                                <AvatarFallback>{initials}</AvatarFallback>
-                              </Avatar>
-                            ) : (
-                              <Avatar className="flex justify-center items-center">
-                                {Icon && <Icon size={18} />}
-                              </Avatar>
-                            )}
-                          </span>
-                          <p
-                            className={cn(
-                              "max-w-[100px] truncate",                              isOpen
-                                ? "translate-x-0 opacity-100"
-                                : "-translate-x-96 opacity-0"
-                            )}
-                          >
-                            {label}
-                          </p>
-                        </Link>
-                      </Button>
-                      <TooltipContent
-                        side="right"
-                        align="start"
-                        
-                      >
-                        {label}
-                      </TooltipContent>
-                    </TooltipTrigger>
-                  </Tooltip>
-                </TooltipProvider>
-              )
+              ) => {
+                const isOnline = onlineUsers.some(
+                  (onlineUser) => onlineUser.userId === user?._id
+                );
+                return (
+                  <TooltipProvider key={index} disableHoverableContent>
+                    <Tooltip delayDuration={100}>
+                      <TooltipTrigger className="w-full">
+                        <Button
+                          key={index}
+                          variant={active ? "secondary" : "ghost"}
+                          className="w-full justify-start h-10 mb-1 text-gray-600"
+                          asChild
+                          onClick={() => {
+                            setRecipientId(recipientId as string);
+                            if (chatId) {
+                              setChatId(chatId);
+                            }
+                            if (user) {
+                              setSelectedUser(user);
+                            }
+                          }}
+                        >
+                          <Link to={href} className="w-full">
+                            <span className="relative mr-4 ml-2">
+                              {initials ? (
+                                <Avatar className="flex justify-center items-center">
+                                  <AvatarFallback>{initials}</AvatarFallback>
+                                </Avatar>
+                              ) : (
+                                <Avatar className="flex justify-center items-center">
+                                  {Icon && <Icon size={18} />}
+                                </Avatar>
+                              )}
+                              {isOnline && (
+                                <span className="absolute bottom-0 right-0 bg-green-500 border-2 text-xs text-white border-white rounded-full w-4 h-4 flex items-center justify-center" />
+                              )}
+                            </span>
+                            <p
+                              className={cn(
+                                "max-w-[100px] truncate",
+                                isOpen
+                                  ? "translate-x-0 opacity-100"
+                                  : "-translate-x-96 opacity-0"
+                              )}
+                            >
+                              {label}
+                            </p>
+                          </Link>
+                        </Button>
+                        <TooltipContent side="right" align="start">
+                          {label}
+                        </TooltipContent>
+                      </TooltipTrigger>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              }
             )}
           </div>
         )}

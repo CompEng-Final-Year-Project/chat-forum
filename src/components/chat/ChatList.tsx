@@ -72,7 +72,7 @@ export function ChatList({ messages }: ChatListProps) {
                     originY: 0.5,
                   }}
                   className={cn(
-                    "flex flex-col gap-2 p-4 whitespace-pre-wrap",
+                    "flex flex-col gap-2 p-1 whitespace-pre-wrap",
                     message.sender === user?._id ? "items-end" : "items-start"
                   )}
                 >

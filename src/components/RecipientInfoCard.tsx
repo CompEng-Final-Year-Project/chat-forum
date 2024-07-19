@@ -17,7 +17,6 @@ export function RecipientInfoCard({
   channel,
 }: UserCardProps) {
   const initials = getInitials(user?.firstName, user?.lastName);
-  console.log(channel);
 
   return (
     <div className="bg-white shadow-lg mt[-24px] rounded-lg p-4 w-full max-w-sm border">

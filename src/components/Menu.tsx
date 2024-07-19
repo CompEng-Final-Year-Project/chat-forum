@@ -20,7 +20,7 @@ interface MenuProps {
 
 export function Menu({ isOpen }: MenuProps) {
   const { pathname } = useLocation();
-  const { createChat, userChats, potentialChats, userGroupChats } = useChat();
+  const { createChat, userChats, potentialChats, userGroupChats, setRecipientId } = useChat();
   const menuList = getMenuList(pathname, userChats as UserChatWithId[], userGroupChats as UserGroupChatWithId[]);
 
   return (
@@ -122,7 +122,9 @@ export function Menu({ isOpen }: MenuProps) {
                         <Button
                           variant="ghost"
                           className="w-full justify-start h-10 mb-1"
-                          onClick={() => createChat(user._id)}
+                          onClick={() => {
+                            setRecipientId(user._id)
+                            createChat(user._id)}}
                         >
                           <span className={cn(isOpen === false ? "" : "mr-4")}>
                             <Ellipsis size={18} />

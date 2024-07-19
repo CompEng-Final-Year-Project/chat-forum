@@ -80,20 +80,7 @@ export function getMenuList(pathname: string, users: UserChatWithId[], userChann
               chatId
             }
           }) 
-          // [
-          //   {
-          //     href: "/channels/:id",
-          //     label: "Marvin",
-          //     active: pathname === "/channels/:id",
-          //     icon: FaHashtag,
-          //   },
-          //   {
-          //     href: "/posts/new",
-          //     label: "Mavis",
-          //     active: pathname === "/channels/:id",
-          //     icon: FaHashtag,
-          //   },
-          // ],
+
         },
       ],
     },

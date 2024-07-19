@@ -11,6 +11,7 @@ import {
 import { Avatar, AvatarFallback } from "./ui/avatar";
 
 import { FaCrown } from "react-icons/fa";
+import { useSocket } from "@/contexts/SocketContext";
 // import { useNavigate } from "react-router-dom";
 
 interface UserListProps {
@@ -19,6 +20,7 @@ interface UserListProps {
 
 export function UserList({ users }: UserListProps) {
   const [search, setSearch] = useState<string>("");
+  const {onlineUsers} = useSocket()
 
 //   const navigate = useNavigate();
 
@@ -38,7 +40,9 @@ export function UserList({ users }: UserListProps) {
         className="w-full p-2 border rounded mb-4"
       />
       <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {filteredUsers.map((user, index) => (
+        {filteredUsers.map((user, index) => {
+          const isOnline = onlineUsers.some(onlineUser => onlineUser.userId === user._id)
+          return(
           <TooltipProvider key={index} disableHoverableContent>
             <Tooltip delayDuration={100}>
               <TooltipTrigger>
@@ -56,9 +60,11 @@ export function UserList({ users }: UserListProps) {
                         {getInitials(user.firstName, user.lastName)}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="absolute bottom-0 right-0 bg-green-500 border-2 text-xs text-white border-white rounded-full w-5 h-5 flex items-center justify-center">
+                    {isOnline && 
+                    <span className="absolute bottom-0 right-0 bg-green-500 border-2 text-xs text-white border-white rounded-full w-4 h-4 flex items-center justify-center">
                       {user.role !== "student" && <FaCrown />}
                     </span>
+                    }
                   </div>
                   <p className="text-sm mt-1">{user.firstName}</p>
                 </div>
@@ -68,7 +74,7 @@ export function UserList({ users }: UserListProps) {
               </TooltipTrigger>
             </Tooltip>
           </TooltipProvider>
-        ))}
+        )})}
       </div>
     </div>
   );

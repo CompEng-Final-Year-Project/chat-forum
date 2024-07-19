@@ -102,7 +102,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     if (socket === null) {
       return;
     }
-    console.log(newMessage)
     if (newMessage?.courseId) {
       socket.emit("sendGroupMessage", {
         ...newMessage
@@ -133,6 +132,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       socket.off("getMessage");
+      socket.off("getGroupMessage")
     };
   }, [socket, recipientId]);
 
@@ -239,6 +239,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         navigate(`/direct-messages/${secondId}`);
       }
 
+      setChatId(response.chat._id)
       await getUserChats();
     },
     [getUserChats]
@@ -285,6 +286,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           `${baseUrl}/message/send-message`,
           JSON.stringify(sentMessage)
         );
+        console.log(response)
 
         if (response.error) {
           return setSendTextMessageError(response.message);

@@ -40,9 +40,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         console.error("Connection error:", error);
       });
 
-      socket.on("getOnlineUsers", (users: OnlineUsers[]) => {
-        setOnlineUsers(users);
-      });
+     
 
       return () => {
         socket.close();
@@ -50,6 +48,19 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       };
     }
   }, [user]);
+
+  useEffect(() => {
+    if (socket === null) {
+      return;
+    }
+    socket.on("getOnlineUsers", (users: OnlineUsers[]) => {
+      setOnlineUsers(users);
+    });
+
+    return () => {
+      socket.off("getOnlineUsers")
+    }
+  }, [socket])
 
   const value: SocketContextProps = { onlineUsers, socket };
 

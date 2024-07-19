@@ -2,7 +2,6 @@ import { FileImage, Mic, Paperclip, SendHorizontal } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
 import { EmojiPicker } from "../EmojiPicker";
 
 import { useChat } from "@/contexts/ChatContext";
@@ -67,21 +66,8 @@ const ChatBottomBar = () => {
         </Button>
       </div>
 
-      <AnimatePresence initial={false}>
-        <motion.div
-          key="input"
+        <div
           className="w-full relative"
-          layout
-          initial={{ opacity: 0, scale: 1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1 }}
-          transition={{
-            opacity: { duration: 0.05 },
-            layout: {
-              type: "spring",
-              bounce: 0.15,
-            },
-          }}
         >
           <textarea
             autoComplete="off"
@@ -93,10 +79,9 @@ const ChatBottomBar = () => {
             placeholder="Message"
             className={cn(
               "w-full border flex items-center resize-none overflow-y-auto bg-background p-2 max-h-[10rem]  ",
-              "rounded-t-lg" 
+              "rounded-t-lg outline-none text-sm" 
             )}
-            rows={1} // Initial number of rows
-            // style={{ height: "auto", overflow: "hidden" }}
+            rows={1} 
           />
           <div className="absolute right-2 bottom-0.5  ">
             <EmojiPicker
@@ -108,7 +93,7 @@ const ChatBottomBar = () => {
               }}
             />
           </div>
-        </motion.div>
+        </div>
 
             <div className="flex items-end h-full">
 
@@ -151,7 +136,6 @@ const ChatBottomBar = () => {
           //   )}
         )}
           </div>
-      </AnimatePresence>
     </div>
   );
 };

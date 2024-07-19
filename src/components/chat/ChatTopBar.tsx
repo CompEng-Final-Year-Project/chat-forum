@@ -13,16 +13,21 @@ import { RecipientInfoCard } from "../RecipientInfoCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { Skeleton } from "../ui/skeleton";
 import SheetSideBar from "../SheetSideBar";
+import { useSocket } from "@/contexts/SocketContext";
 
 export default function ChatTopBar({ type }: { type: "direct" | "course" }) {
   const { user } = useAuth();
   const { selectedUser, channel } = useChat();
   const [showInfoCard, setShowInfoCard] = useState(false);
   const infoCardRef = useRef<HTMLDivElement>(null);
+  const { onlineUsers } = useSocket();
   // const [loading, setLoading] = useState(false)
 
   const sharedCourses = user?.courses.filter((course) =>
     selectedUser?.courses.some((course2) => course._id === course2._id)
+  );
+  const isOnline = onlineUsers.some(
+    (user) => user.userId === selectedUser?._id
   );
 
   const toggleCard = () => {
@@ -69,6 +74,7 @@ export default function ChatTopBar({ type }: { type: "direct" | "course" }) {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
+                  <div className="relative inline-block">
                   <Avatar className="flex justify-center items-center">
                     {/* <AvatarImage
             src={selectedUser?.avatar}
@@ -79,9 +85,20 @@ export default function ChatTopBar({ type }: { type: "direct" | "course" }) {
             /> */}
                     <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
+                  {isOnline && (
+                    <span className="absolute bottom-0 right-0 bg-green-500 border-2 text-xs text-white border-white rounded-full w-4 h-4 flex items-center justify-center" />
+                  )}
+
+                  </div>
                   <div className="flex flex-col">
-                    <span className="font-medium max-sm:w-[8.5rem] truncate">{`${selectedUser?.firstName} ${selectedUser?.lastName}`}</span>
-                    <span className="text-xs">Active 2 mins ago</span>
+                    <span className="font-medium max-sm:w-[8.5rem] truncate">
+                      {`${selectedUser?.firstName} ${selectedUser?.lastName}`}{" "}
+                    </span>
+                    {isOnline ? (
+                      <span className="text-xs">Online</span>
+                    ) : (
+                      <span className="text-xs">Active 2 mins ago</span>
+                    )}
                   </div>
                 </div>
               )}
@@ -104,7 +121,9 @@ export default function ChatTopBar({ type }: { type: "direct" | "course" }) {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
-                    <span className="font-medium max-sm:w-[8.5rem] truncate">{channel.name}</span>
+                    <span className="font-medium max-sm:w-[8.5rem] truncate">
+                      {channel.name}
+                    </span>
                     <span className="text-xs">Active 2 mins ago</span>
                   </div>
                 </div>
