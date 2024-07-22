@@ -1,4 +1,4 @@
-import { UserChatWithId, UserGroupChatWithId, UserProps } from "@/types";
+import { Message, UserChatWithId, UserGroupChatWithId, UserProps } from "@/types";
 import { getInitials } from "@/utils/helpers";
 import { Inbox, LucideIcon } from "lucide-react";
 import { FaHashtag, FaPaperPlane, FaUsers } from "react-icons/fa";
@@ -15,6 +15,7 @@ type Submenu = {
   recipientId?: string;
   user?: UserProps
   chatId?: string
+  latestMessage: Message
 };
 
 type Menu = {
@@ -54,7 +55,7 @@ export function getMenuList(pathname: string, users: UserChatWithId[], userChann
           label: "Direct Messages",
           active: false,
           icon: FaPaperPlane,
-          submenus: users?.map(({user, chatId}) => {
+          submenus: users?.map(({user, chatId, messages}) => {
             return {
               href: `/direct-messages/${user._id}`,
               label: `${user.firstName} ${user.lastName}`,
@@ -62,22 +63,24 @@ export function getMenuList(pathname: string, users: UserChatWithId[], userChann
               initials: getInitials(user.firstName, user.lastName),
               recipientId: user._id,
               chatId,
-              user
+              user,
+              latestMessage: messages[messages.length -1]
             };
           }),
         },
         {
           href: "",
           label: "Channels",
-          active: pathname.includes("/channels"),
+          active: false,
           icon: FaUsers,
-          submenus: userChannels?.map(({name, chatId}) => {
+          submenus: userChannels?.map(({name, chatId, messages}) => {
             return {
               href: `/channels/${chatId}`,
               label: name as string,
               active: pathname === `/channels/${chatId}`,
               icon: FaHashtag,
-              chatId
+              chatId,
+              latestMessage: messages[messages.length -1]
             }
           }) 
 

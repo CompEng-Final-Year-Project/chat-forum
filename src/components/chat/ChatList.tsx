@@ -5,10 +5,9 @@ import ChatBottomBar from "./ChatBottomBar";
 import { AnimatePresence, motion } from "framer-motion";
 import { Message } from "@/types";
 import { useChat } from "@/contexts/ChatContext";
-import { getInitials } from "@/utils/helpers";
+import { getFormattedTime, getInitials } from "@/utils/helpers";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "../spinner";
-import moment from "moment";
 import { FaCrown } from "react-icons/fa";
 
 interface ChatListProps {
@@ -31,8 +30,10 @@ export function ChatList({ messages }: ChatListProps) {
     }
   }, [messages]);
 
+  
+
   return (
-    <div className="w-full overflow-y-hidden overflow-x-hidden h-full flex flex-col">
+    <div className="w-full  overflow-y-hidden overflow-x-hidden h-full flex flex-col">
       
       {loadingMessages ? (
         <div className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col justify-center">
@@ -45,7 +46,7 @@ export function ChatList({ messages }: ChatListProps) {
         >
           <AnimatePresence>
             {messages?.map((message, index) => {
-              const formattedTime = moment(message.createdAt).format("h:mm A");
+              const formattedTime = getFormattedTime(message.createdAt);
               const sender =
                 users && users?.find((user) => user._id === message.sender);
               const selectedUserInitials = getInitials(
@@ -72,7 +73,7 @@ export function ChatList({ messages }: ChatListProps) {
                     originY: 0.5,
                   }}
                   className={cn(
-                    "flex flex-col gap-2 p-1 whitespace-pre-wrap",
+                    "flex flex-col gap-2 py-1 px-[24px] whitespace-pre-wrap",
                     message.sender === user?._id ? "items-end" : "items-start"
                   )}
                 >
@@ -105,10 +106,10 @@ export function ChatList({ messages }: ChatListProps) {
                         )}
                       </>
                     )}
-                    <div className=" flex flex-col space-y-1">
+                    <div className=" flex flex-col w-full  space-y-1">
                       <span className={`${
                           message.sender === user?._id
-                            ? "bg-green-500 text-accent"
+                            ? "bg-green-500 text-accent self-end "
                             : "bg-accent"}
                               p-2 rounded-lg max-w-xs shadow-sm shadow-neutral-400 text-sm w-fit`}>
                         {message.text}

@@ -7,7 +7,7 @@ import { LogOut } from "lucide-react";
 const Sidebar = () => {
   const { logout } = useAuth();
   return (
-    <div className="bg-muted/40 h-screen p-4 md:w-64 md:border-r flex flex-col justify-between">
+    <div className="bg-muted/40 h-screen p-4 w-80 md:border-r flex flex-col justify-between">
       <div className="flex flex-col">
         <div className="flex items-center gap-2 mb-4">
           <img

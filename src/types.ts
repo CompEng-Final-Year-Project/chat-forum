@@ -28,6 +28,13 @@ export interface Message {
   courseId?: string
 }
 
+export interface Notifications {
+  sender: string
+  chatId: string
+  isRead: boolean
+  date: Date
+}
+
 export interface User {
   id: number;
   avatar: string;
