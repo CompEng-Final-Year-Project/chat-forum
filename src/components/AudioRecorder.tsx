@@ -1,9 +1,9 @@
-import React, {  useContext } from 'react';
+import React from 'react';
 import { Button } from './ui/button';
-import { PostContext } from '@/contexts/PostContext';
+import { usePost } from '@/contexts/PostContext';
 
 const AudioRecorder: React.FC = () => {
-  const {isRecording, startRecording, stopRecording} = useContext(PostContext)
+  const {isRecording, startRecording, stopRecording} = usePost()
 
  
   return (

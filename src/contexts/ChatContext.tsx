@@ -38,7 +38,7 @@ interface ChatContextProps {
   channel: UserGroupChatWithId | null;
   sendTextMessageError: string;
   notifications: Notifications[];
-  markAsRead: (chatId: string, notifications: Notifications[]) => void
+  markAsRead: (chatId: string, notifications: Notifications[]) => void;
 }
 
 export const ChatContext = createContext<ChatContextProps>({
@@ -58,7 +58,7 @@ export const ChatContext = createContext<ChatContextProps>({
   channel: null,
   sendTextMessageError: "",
   notifications: [],
-  markAsRead: () => null
+  markAsRead: () => null,
 });
 
 export const useChat = () => {
@@ -92,7 +92,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const { socket } = useSocket();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-
   const { user, users } = useAuth();
 
   useEffect(() => {
@@ -128,17 +127,20 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     if (socket === null) {
       return;
     }
-    socket?.on("getMessage", (message: Message) => {
-      if (message.sender !== recipientId) {
+    socket?.on("getMessage", (message) => {
+      // console.log(message);
+      if(chatId === message.chatId){
+      if (message.sender !== recipientId ) {
         return;
       }
       setMessages((prevMessages) =>
         prevMessages ? [...prevMessages, message] : [message]
       );
+    }else{return}
     });
 
     socket?.on("getNotifications", (response) => {
-      console.log(response);
+      // console.log(response);
       if (response.chatId === chatId) {
         setNotifications((prev) =>
           prev
@@ -150,19 +152,39 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
+    
     socket.on("getGroupMessage", (message) => {
-      if (user?._id === message.sender) {
+      // console.log("group", message);
+      if (chatId === message.chatId) {
+        if (user?._id === message.sender) {
+          return;
+        }
+        setMessages((prevMessages) =>
+          prevMessages ? [...prevMessages, message] : [message]
+        );
+      } else {
         return;
       }
-      setMessages((prevMessages) =>
-        prevMessages ? [...prevMessages, message] : [message]
-      );
+    });
+
+    socket?.on("getGroupNotifications", (response) => {
+      console.log(response)
+      if (response.chatId === chatId) {
+        setNotifications((prev) =>
+          prev
+            ? [{ ...response, isRead: true }, ...prev]
+            : [{ ...response, isRead: true }]
+        );
+      } else {
+        setNotifications((prev) => (prev ? [response, ...prev] : [response]));
+      }
     });
 
     return () => {
       socket.off("getMessage");
       socket.off("getGroupMessage");
       socket.off("getNotifications");
+      socket.off("getGroupNotifications")
     };
   }, [socket, recipientId]);
 
@@ -217,8 +239,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       const potentialChatsUsers = users?.filter(
         (userItem) => !userChatIds.includes(userItem._id.toString())
       );
-      // const usersLatestMessages = userChatsWithIds?.map(chat => console.log(chat))
-      // console.log(userChatsWithIds)
+
       setUserChats(userChatsWithIds);
       setPotentialChats(potentialChatsUsers);
       setUserGroupChats(userGroupChatsWithIds);
@@ -376,7 +397,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     channel,
     sendTextMessageError,
     notifications,
-    markAsRead
+    markAsRead,
   };
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };

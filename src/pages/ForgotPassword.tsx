@@ -22,7 +22,7 @@ const ForgotPassword = () => {
     indexNumber: z
       .string()
       .length(10, {
-        message: "Index number must be exactly 10 characters long",
+        message: "Invalid indx number",
       })
       .nonempty({ message: "Index number is required" }),
   });
@@ -72,7 +72,7 @@ const ForgotPassword = () => {
               alt="University Chat Forum"
             />
           </div>
-          {isEmailSent ? (
+          {!isEmailSent ? (
             <EmailSuccess />
           ) : (
             <>

@@ -150,3 +150,23 @@
   background: rgb(var(--foreground-rgb));
   border-radius: 5px;
 }
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.blinking-red-light {
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+  margin-left: 10px;
+}
+
+/* canvas {
+  margin-top: 20px;
+  border: 1px solid #ddd;
+} */
