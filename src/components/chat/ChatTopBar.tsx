@@ -1,19 +1,20 @@
 // import { Info, Phone, Video } from 'lucide-react';
 // import { cn } from '@/lib/utils';
-import { UserProps } from "@/types";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { useEffect, useRef, useState } from "react";
+import { UserGroupChatWithId, UserProps } from "@/types";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import { getInitials } from "@/utils/helpers";
 import { cn } from "@/lib/utils";
-import { HashIcon, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { Button } from "../ui/button";
 import { RecipientInfoCard } from "../RecipientInfoCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { Skeleton } from "../ui/skeleton";
 import SheetSideBar from "../SheetSideBar";
 import { useSocket } from "@/contexts/SocketContext";
+
+const ChatHeader = lazy(() => import("../ChatHeader"));
 
 export default function ChatTopBar({ type }: { type: "direct" | "course" }) {
   const { user } = useAuth();
@@ -62,74 +63,24 @@ export default function ChatTopBar({ type }: { type: "direct" | "course" }) {
           <SheetSideBar />
         </div>
         <div className="w-full overflow-hidden h-20 flex justify-between items-center ">
-          {type === "direct" ? (
-            <>
-              {!selectedUser ? (
-                <div className="flex items-center space-x-4">
-                  <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-[200px] bg-neutral-200" />
-                    <Skeleton className="h-4 w-[150px] bg-neutral-200" />
-                  </div>
+          <Suspense
+            fallback={
+              <div className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[200px] bg-neutral-200" />
+                  <Skeleton className="h-4 w-[150px] bg-neutral-200" />
                 </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <div className="relative inline-block">
-                  <Avatar className="flex justify-center items-center">
-                    {/* <AvatarImage
-            src={selectedUser?.avatar}
-            alt={selectedUser?.firstName}
-            width={6}
-            height={6}
-            className="w-10 h-10 "
-            /> */}
-                    <AvatarFallback>{initials}</AvatarFallback>
-                  </Avatar>
-                  {isOnline && (
-                    <span className="absolute bottom-0 right-0 bg-green-500 border-2 text-xs text-white border-white rounded-full w-4 h-4 flex items-center justify-center" />
-                  )}
-
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-medium max-sm:w-[8.5rem] truncate">
-                      {`${selectedUser?.firstName} ${selectedUser?.lastName}`}{" "}
-                    </span>
-                    {isOnline ? (
-                      <span className="text-xs">Online</span>
-                    ) : (
-                      <span className="text-xs">Active 2 mins ago</span>
-                    )}
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              {!channel ? (
-                <div className="flex items-center space-x-4">
-                  <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-[200px] bg-neutral-200" />
-                    <Skeleton className="h-4 w-[150px] bg-neutral-200" />
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Avatar className="flex justify-center items-center">
-                    <AvatarFallback>
-                      <HashIcon />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="font-medium max-sm:w-[8.5rem] truncate">
-                      {channel.name}
-                    </span>
-                    <span className="text-xs">Active 2 mins ago</span>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+              </div>
+            }
+          >
+            <ChatHeader
+              channel={channel as UserGroupChatWithId}
+              initials={initials}
+              isOnline={isOnline}
+              selectedUser={selectedUser as UserProps}              type={type}
+            />
+          </Suspense>
 
           <div className="">
             <Button

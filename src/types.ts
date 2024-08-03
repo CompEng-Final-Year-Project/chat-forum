@@ -1,6 +1,6 @@
-export interface OnlineUsers{
-  userId: string
-  socketId: string
+export interface OnlineUsers {
+  userId: string;
+  socketId: string;
 }
 export interface LoginProps {
   indexNumber: string;
@@ -17,22 +17,34 @@ export interface UserProps {
   email: string;
   role: "student" | "lecturer" | "HOD";
   department: string;
-  courses: {_id: string, name: string}[];
-  _id: string
+  courses: { _id: string; name: string }[];
+  _id: string;
+}
+
+export interface UploadResponse {
+  uploadResult: {
+    secure_url: string;
+  };
+  type: "text" | "document" | "audio" | "video" | "image";
 }
 
 export interface Message {
+  _id?: string;
   text: string;
   sender: string;
   createdAt: Date;
-  courseId?: string
+  courseId?: string;
+  error?: boolean;
+  type: "text" | "document" | "audio" | "video" | "image";
+  sending?: boolean;
+  chatId: string;
 }
 
 export interface Notifications {
-  sender: string
-  chatId: string
-  isRead: boolean
-  date: Date
+  sender: string;
+  chatId: string;
+  isRead: boolean;
+  date: Date;
 }
 
 export interface User {
@@ -42,13 +54,13 @@ export interface User {
   name: string;
 }
 
-export interface UserChat{
-  _id: string
-  members: string[]
-  messages: Message[]
-  type: "direct" | "course"
-  name?: string
-  courses: string[]
+export interface UserChat {
+  _id: string;
+  members: string[];
+  messages: Message[];
+  type: "direct" | "course";
+  name?: string;
+  courses: string[];
 }
 
 export interface UserChatWithId {
@@ -61,5 +73,5 @@ export interface UserGroupChatWithId {
   chatId: string;
   messages: Message[];
   name: string;
-  courses: string[]
+  courses: string[];
 }

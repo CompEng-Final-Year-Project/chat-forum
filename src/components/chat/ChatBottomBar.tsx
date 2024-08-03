@@ -1,4 +1,11 @@
-import { FileImage, Mic, Paperclip, SendHorizontal, Trash2, X } from "lucide-react";
+import {
+  FileImage,
+  Mic,
+  Paperclip,
+  SendHorizontal,
+  Trash2,
+  X,
+} from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
@@ -12,7 +19,7 @@ import { LiveAudioVisualizer } from "react-audio-visualize";
 const ChatBottomBar = () => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { sendTextMessage, chatId } = useChat();
+  const { sendTextMessage, chatId, upload } = useChat();
   const [files, setFiles] = useState<File[] | null>(null);
   const {
     isRecording,
@@ -21,11 +28,10 @@ const ChatBottomBar = () => {
     audioUrl,
     setAudioUrl,
     recordingTime,
-    // blob,
     mediaRecord,
   } = usePost();
 
-  console.log(files)
+  // console.log(files);
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -34,6 +40,12 @@ const ChatBottomBar = () => {
       .toString()
       .padStart(2, "0")}`;
   };
+
+  // useEffect(() => {
+  //   if (files) {
+  //     upload(files[0]).then(res=> console.log(res)).catch(err => console.log(err))
+  //   }
+  // }, [files]);
 
   const handleFileChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,6 +56,7 @@ const ChatBottomBar = () => {
         );
         if (filteredFiles < selectedFiles) {
           alert("Some files were too large and were not added");
+          return;
         }
         setFiles(filteredFiles);
       }
@@ -55,14 +68,32 @@ const ChatBottomBar = () => {
     setMessage(event.target.value);
   };
 
-  const handleSend = () => {
-    if (message.trim()) {
-      sendTextMessage(message.trim(), chatId);
-      setMessage("");
+  const handleSend = async () => {
+    try {
+      if (message.trim()) {
+        await sendTextMessage(message.trim(), "text", chatId);
+        setMessage("");
 
-      if (textareaRef.current) {
-        textareaRef.current.focus();
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
+      } else if (files) {
+        files.forEach(async (file) => {
+          const uploadedFile = await upload(file);
+          if (uploadedFile) {
+            await sendTextMessage(
+              uploadedFile.uploadResult.secure_url,
+              uploadedFile.type,
+              chatId
+            );
+          }
+        });
+      } else if (audioUrl) {
+        await sendTextMessage(audioUrl, "audio", chatId);
       }
+    } finally {
+      setFiles(null);
+      setAudioUrl("");
     }
   };
 
@@ -91,7 +122,7 @@ const ChatBottomBar = () => {
 
   return (
     <div className="p-2  flex justify-between w-full items-center gap-2">
-      <div className="flex items-end h-full">
+      <div className="flex items-end  h-full">
         <Button
           variant={"ghost"}
           size={"icon"}
@@ -105,7 +136,42 @@ const ChatBottomBar = () => {
         </Button>
       </div>
 
-      <div className="w-full relative">
+      <div className="w-full relative ">
+        {files && (
+          <div className="w-[26rem] p-4  absolute bottom-10 rounded-lg z-50 bg-neutral-100 right-0  max-h-[20rem] h-[20rem] shadow-2xl flex gap-1 overflow-auto flex-wrap items-center justify-center">
+            <Button
+              onClick={() => setFiles(null)}
+              variant={"ghost"}
+              size={"icon"}
+              className="absolute top-0 right-0 m-2 "
+            >
+              <X />
+            </Button>
+            {files.map((file, index) => (
+              <>
+                {file.type.includes("image") ? (
+                  <img
+                    key={index}
+                    className={`object-cover shadow-lg ${
+                      files.length === 1 ? "w-1/2" : "w-[49%] h-1/2"
+                    } `}
+                    src={URL.createObjectURL(file)}
+                    alt=""
+                  />
+                ) : (
+                  <video
+                    className={`object-cover shadow-lg ${
+                      files.length === 1 ? "w-1/2" : "w-[49%] h-1/2"
+                    } `}
+                    controls
+                    key={index}
+                    src={URL.createObjectURL(file)}
+                  />
+                )}
+              </>
+            ))}
+          </div>
+        )}
         {audioUrl ? (
           <div className="w-full flex items-center">
             <audio controls className="w-full h-10" src={audioUrl} />
@@ -124,18 +190,19 @@ const ChatBottomBar = () => {
               <div className=" flex items-center gap-2 w-full">
                 <div className="blinking-red-light"></div>
                 <p>{formatTime(recordingTime)}</p>
-                {mediaRecord && 
-                <LiveAudioVisualizer
-                mediaRecorder={mediaRecord && mediaRecord}
-                width={250}
-                height={30}
-                 barColor="#83838B"
-                />
-              }
+                {mediaRecord && (
+                  <LiveAudioVisualizer
+                    mediaRecorder={mediaRecord && mediaRecord}
+                    width={250}
+                    height={30}
+                    barColor="#83838B"
+                  />
+                )}
               </div>
             ) : (
               <>
                 <textarea
+                  disabled={files !== null}
                   autoComplete="off"
                   value={message}
                   ref={textareaRef}
@@ -166,7 +233,7 @@ const ChatBottomBar = () => {
       </div>
 
       <div className="flex items-end h-full">
-        {message.trim() || audioUrl ? (
+        {message.trim() || audioUrl || files ? (
           <Button
             variant={"ghost"}
             size={"icon"}

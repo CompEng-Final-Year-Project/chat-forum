@@ -27,7 +27,6 @@ import { Icon } from "@/lib/menu-list";
 import { useChat } from "@/contexts/ChatContext";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Message, UserProps } from "@/types";
-import { Skeleton } from "./ui/skeleton";
 import { useSocket } from "@/contexts/SocketContext";
 import { getFormattedTime, unreadNotification } from "@/utils/helpers";
 import { Badge } from "./ui/badge";
@@ -52,15 +51,20 @@ interface CollapseMenuButtonProps {
   isOpen: boolean | undefined;
 }
 
-export function CollapseMenuButton({
+const CollapseMenuButton = ({
   icon: Icon,
   label,
   active,
   submenus,
   isOpen,
-}: CollapseMenuButtonProps) {
-  const { setRecipientId, setChatId, setSelectedUser, notifications, markAsRead } =
-    useChat();
+}: CollapseMenuButtonProps) => {
+  const {
+    setRecipientId,
+    setChatId,
+    setSelectedUser,
+    notifications,
+    markAsRead,
+  } = useChat();
   const { onlineUsers } = useSocket();
 
   return isOpen ? (
@@ -111,7 +115,7 @@ export function CollapseMenuButton({
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-        {!submenus ? (
+        {/* {!submenus ? (
           <div className="flex items-center space-x-4">
             <Skeleton className="h-12 w-12 rounded-full bg-neutral-200" />
             <div className="space-y-2">
@@ -119,120 +123,125 @@ export function CollapseMenuButton({
               <Skeleton className="h-4 w-[150px] bg-neutral-200" />
             </div>
           </div>
-        ) : (
-          <div className="">
-            {submenus?.map(
-              (
-                {
-                  href,
-                  label,
-                  active,
-                  icon: Icon,
-                  recipientId,
-                  initials,
-                  chatId,
-                  user,
-                  latestMessage,
-                },
-                index
-              ) => {
-                const isOnline = onlineUsers.some(
-                  (onlineUser) => onlineUser.userId === user?._id
-                );
+        ) : ( */}
+        <div className="">
+          {submenus?.map(
+            (
+              {
+                href,
+                label,
+                active,
+                icon: Icon,
+                recipientId,
+                initials,
+                chatId,
+                user,
+                latestMessage,
+              },
+              index
+            ) => {
+              const isOnline = onlineUsers.some(
+                (onlineUser) => onlineUser.userId === user?._id
+              );
 
-                const chatsNotifications = unreadNotification(
-                  notifications
-                )?.filter((n) => n.chatId === chatId);
+              const chatsNotifications = unreadNotification(
+                notifications
+              )?.filter((n) => n.chatId === chatId);
 
-                return (
-                  <TooltipProvider key={index} disableHoverableContent>
-                    <Tooltip delayDuration={100}>
-                      <TooltipTrigger className="w-full">
-                        <Button
-                          key={index}
-                          variant={active ? "secondary" : "ghost"}
-                          className="w-full justify-start h-auto mb-1 text-gray-600"
-                          asChild
-                          onClick={() => {
-                            setRecipientId(recipientId as string);
-                            if (chatId) {
-                              setChatId(chatId);
-                            }
-                            if (user) {
-                              setSelectedUser(user);
-                            }
-                            if (chatsNotifications){
-                              markAsRead(chatId as string, notifications)
-                            }
-                          }}
-                        >
-                          <div>
-                            <Link to={href} className="w-full">
-                              <div className="flex flex-row items-center w-full">
-                                <span className="relative mr-4 ml-2">
-                                  {initials ? (
-                                    <Avatar className="flex justify-center items-center">
-                                      <AvatarFallback>
-                                        {initials}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  ) : (
-                                    <Avatar className="flex justify-center items-center">
-                                      {Icon && <Icon size={18} />}
-                                    </Avatar>
-                                  )}
-                                  {isOnline && (
-                                    <span className="absolute bottom-0 right-0 bg-green-500 border-2 text-xs text-white border-white rounded-full w-4 h-4 flex items-center justify-center" />
-                                  )}
-                                </span>
-                                <div className="flex flex-col items-start w-full">
-                                  <div className="flex flex-row w-full items-center justify-between">
-                                    <p
-                                      className={cn(
-                                        "max-w-[100px] truncate",
-                                        isOpen
-                                          ? "translate-x-0 opacity-100"
-                                          : "-translate-x-96 opacity-0"
-                                      )}
-                                    >
-                                      {label}
-                                    </p>
-                                    {chatsNotifications.length > 0 && (
-                                      <span>
-                                        <Badge className="">
-                                          {chatsNotifications.length}
-                                        </Badge>
-                                      </span>
+              return (
+                <TooltipProvider key={index} disableHoverableContent>
+                  <Tooltip delayDuration={100}>
+                    <TooltipTrigger className="w-full">
+                      <Button
+                        key={index}
+                        variant={active ? "secondary" : "ghost"}
+                        className="w-full justify-start h-auto mb-1 text-gray-600"
+                        asChild
+                        onClick={() => {
+                          setRecipientId(recipientId as string);
+                          if (chatId) {
+                            setChatId(chatId);
+                          }
+                          if (user) {
+                            setSelectedUser(user);
+                          }
+                          if (chatsNotifications) {
+                            markAsRead(chatId as string, notifications);
+                          }
+                        }}
+                      >
+                        <div>
+                          <Link to={href} className="w-full">
+                            <div className="flex flex-row items-center w-full">
+                              <span className="relative mr-4 ml-2">
+                                {initials ? (
+                                  <Avatar className="flex justify-center items-center">
+                                    <AvatarFallback>{initials}</AvatarFallback>
+                                  </Avatar>
+                                ) : (
+                                  <Avatar className="flex justify-center items-center">
+                                    {Icon && <Icon size={18} />}
+                                  </Avatar>
+                                )}
+                                {isOnline && (
+                                  <span className="absolute bottom-0 right-0 bg-green-500 border-2 text-xs text-white border-white rounded-full w-4 h-4 flex items-center justify-center" />
+                                )}
+                              </span>
+                              <div className="flex flex-col items-start w-full">
+                                <div className="flex flex-row w-full items-center justify-between">
+                                  <p
+                                    className={cn(
+                                      "max-w-[100px] truncate",
+                                      isOpen
+                                        ? "translate-x-0 opacity-100"
+                                        : "-translate-x-96 opacity-0"
                                     )}
-                                  </div>
-                                  <div className="flex items-center justify-center font-light">
-                                    <span className="truncate max-w-[4rem] text-start">
-                                      {latestMessage?.text}
+                                  >
+                                    {label}
+                                  </p>
+                                  {chatsNotifications.length > 0 && (
+                                    <span>
+                                      <Badge className="">
+                                        {chatsNotifications.length}
+                                      </Badge>
                                     </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-center font-light">
+                                  <span
+                                    className={`${
+                                      latestMessage ? "truncate" : ""
+                                    } max-w-[4rem] text-start`}
+                                  >
+                                    {latestMessage
+                                      ? latestMessage.text
+                                      : "No conversation"}
+                                  </span>
 
-                                    <span className="ml-1 w-auto">
-                                      ~
-                                      {getFormattedTime(
-                                        latestMessage?.createdAt
-                                      )}
-                                    </span>
-                                  </div>
+                                  <span className="ml-1 w-auto">
+                                    {latestMessage
+                                      ? `~ ${getFormattedTime(
+                                          latestMessage?.createdAt
+                                        )}`
+                                      : ""}
+                                  </span>
                                 </div>
                               </div>
-                            </Link>
-                          </div>
-                        </Button>
-                        <TooltipContent side="right" align="start">
-                          {label}
-                        </TooltipContent>
-                      </TooltipTrigger>
-                    </Tooltip>
-                  </TooltipProvider>
-                );
-              }
-            )}
-          </div>
-        )}
+                            </div>
+                          </Link>
+                        </div>
+                      </Button>
+                      <TooltipContent side="right" align="start">
+                        {label}
+                      </TooltipContent>
+                    </TooltipTrigger>
+                  </Tooltip>
+                </TooltipProvider>
+              );
+            }
+          )}
+        </div>
+        {/* )} */}
       </CollapsibleContent>
     </Collapsible>
   ) : (
@@ -284,4 +293,6 @@ export function CollapseMenuButton({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};
+
+export default CollapseMenuButton;

@@ -1,6 +1,7 @@
 import {
   Message,
   Notifications,
+  UploadResponse,
   UserChat,
   UserChatWithId,
   UserGroupChatWithId,
@@ -29,7 +30,12 @@ interface ChatContextProps {
   selectedUser: UserProps | null;
   setRecipientId: Dispatch<SetStateAction<string>>;
   setSelectedUser: Dispatch<SetStateAction<UserProps | null>>;
-  sendTextMessage: (textMessage: string, currentChatId: string) => void;
+  sendTextMessage: (
+    textMessage: string,
+    type: "text" | "document" | "audio" | "video" | "image",
+    currentChatId: string
+  ) => void;
+  retrySendMessage: (message: Message) => void;
   messages: Message[] | null;
   setChatId: Dispatch<SetStateAction<string>>;
   chatId: string;
@@ -39,6 +45,7 @@ interface ChatContextProps {
   sendTextMessageError: string;
   notifications: Notifications[];
   markAsRead: (chatId: string, notifications: Notifications[]) => void;
+  upload: (file: File) => Promise<UploadResponse | null>;
 }
 
 export const ChatContext = createContext<ChatContextProps>({
@@ -50,6 +57,7 @@ export const ChatContext = createContext<ChatContextProps>({
   setSelectedUser: () => {},
   selectedUser: null,
   sendTextMessage: () => {},
+  retrySendMessage: () => {},
   messages: [],
   setChatId: () => null,
   chatId: "",
@@ -59,6 +67,7 @@ export const ChatContext = createContext<ChatContextProps>({
   sendTextMessageError: "",
   notifications: [],
   markAsRead: () => null,
+  upload: () => Promise.resolve(null),
 });
 
 export const useChat = () => {
@@ -89,6 +98,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const notifications = localStorage.getItem("notifications");
     return notifications ? JSON.parse(notifications) : [];
   });
+
   const { socket } = useSocket();
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -111,82 +121,52 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   }, [recipientId, users]);
 
   useEffect(() => {
-    if (socket === null) {
-      return;
-    }
-    if (newMessage?.courseId) {
-      socket.emit("sendGroupMessage", {
+    if (socket) {
+      socket.emit(newMessage?.courseId ? "sendGroupMessage" : "sendMessage", {
         ...newMessage,
+        recipientId,
       });
-    } else {
-      socket?.emit("sendMessage", { ...newMessage, recipientId });
-    }
-  }, [newMessage]);
 
-  useEffect(() => {
-    if (socket === null) {
-      return;
-    }
-    socket?.on("getMessage", (message) => {
-      // console.log(message);
-      if(chatId === message.chatId){
-      if (message.sender !== recipientId ) {
-        return;
-      }
-      setMessages((prevMessages) =>
-        prevMessages ? [...prevMessages, message] : [message]
-      );
-    }else{return}
-    });
-
-    socket?.on("getNotifications", (response) => {
-      // console.log(response);
-      if (response.chatId === chatId) {
-        setNotifications((prev) =>
-          prev
-            ? [{ ...response, isRead: true }, ...prev]
-            : [{ ...response, isRead: true }]
-        );
-      } else {
-        setNotifications((prev) => (prev ? [response, ...prev] : [response]));
-      }
-    });
-
-    
-    socket.on("getGroupMessage", (message) => {
-      // console.log("group", message);
-      if (chatId === message.chatId) {
-        if (user?._id === message.sender) {
-          return;
+      socket?.on("getMessage", (message) => {
+        if (chatId === message.chatId && message.sender === recipientId) {
+          setMessages((prevMessages) =>
+            prevMessages ? [...prevMessages, message] : [message]
+          );
         }
-        setMessages((prevMessages) =>
-          prevMessages ? [...prevMessages, message] : [message]
-        );
-      } else {
-        return;
-      }
-    });
+      });
 
-    socket?.on("getGroupNotifications", (response) => {
-      console.log(response)
-      if (response.chatId === chatId) {
+      socket?.on("getNotifications", (response) => {
         setNotifications((prev) =>
           prev
-            ? [{ ...response, isRead: true }, ...prev]
-            : [{ ...response, isRead: true }]
+            ? [{ ...response, isRead: response.chatId === chatId }, ...prev]
+            : [response]
         );
-      } else {
-        setNotifications((prev) => (prev ? [response, ...prev] : [response]));
-      }
-    });
+      });
 
-    return () => {
-      socket.off("getMessage");
-      socket.off("getGroupMessage");
-      socket.off("getNotifications");
-      socket.off("getGroupNotifications")
-    };
-  }, [socket, recipientId]);
+      socket.on("getGroupMessage", (message) => {
+        if (chatId === message.chatId && user?._id !== message.sender) {
+          setMessages((prevMessages) =>
+            prevMessages ? [...prevMessages, message] : [message]
+          );
+        }
+      });
+
+      socket?.on("getGroupNotifications", (response) => {
+        setNotifications((prev) =>
+          prev
+            ? [{ ...response, isRead: response.chatId === chatId }, ...prev]
+            : [response]
+        );
+      });
+
+      return () => {
+        socket.off("getMessage");
+        socket.off("getGroupMessage");
+        socket.off("getNotifications");
+        socket.off("getGroupNotifications");
+      };
+    }
+  }, [socket, recipientId, chatId, newMessage, user]);
 
   const getUserChats = useCallback(async () => {
     if (user?._id) {
@@ -233,81 +213,82 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         })
         .filter(Boolean) as UserGroupChatWithId[];
 
-      const userChatIds = userChatsWithIds?.map((chat) => {
-        return chat.user._id;
-      });
-      const potentialChatsUsers = users?.filter(
-        (userItem) => !userChatIds.includes(userItem._id.toString())
-      );
-
       setUserChats(userChatsWithIds);
-      setPotentialChats(potentialChatsUsers);
+      setPotentialChats(
+        users?.filter(
+          (userItem) =>
+            !userChatsWithIds
+              .map((chat) => chat.user._id)
+              .includes(userItem._id.toString())
+        )
+      );
       setUserGroupChats(userGroupChatsWithIds);
     }
-  }, [users, user, newMessage, socket, messages, notifications]);
+  }, [users, user, newMessage, notifications]);
+  // users, user, newMessage, socket, messages, notifications
+
+  useEffect(() => {});
 
   useEffect(() => {
     const getMessages = async () => {
-      try {
+      if (user && chatId) {
         setLoadingMessages(true);
-        if (!user) {
-          return;
+        try {
+          const response = await getRequest(`${baseUrl}/chats/`);
+          const chat = response.chats?.find(
+            (chat: UserChat) => chat._id === chatId
+          );
+          if (chat?.type === "course") {
+            const userDetails = chat.members
+              .map((memberId: string) =>
+                users.find((userItem) => userItem._id.toString() === memberId)
+              )
+              .filter(Boolean) as UserProps[];
+            setChannel({
+              users: userDetails,
+              chatId: chat._id,
+              messages: chat.messages,
+              name: chat.name,
+              courses: chat.courses,
+            });
+          }
+          setMessages(chat?.messages);
+        } catch (error) {
+          console.log(error);
+        } finally {
+          setLoadingMessages(false);
         }
-        const response = await getRequest(`${baseUrl}/chats/`);
-        const chat = response.chats?.find(
-          (chat: UserChat) => chat._id === chatId
-        );
-        if (chat?.type === "course") {
-          const userDetails = chat.members
-            .map((memberId: string) =>
-              users.find((userItem) => userItem._id.toString() === memberId)
-            )
-            .filter(Boolean) as UserProps[];
-          setChannel({
-            users: userDetails,
-            chatId: chat._id,
-            messages: chat.messages,
-            name: chat.name,
-            courses: chat.courses,
-          });
-        }
-        setMessages(chat?.messages);
-        setLoadingMessages(false);
-      } catch (error) {
-        console.log(error);
-        setLoadingMessages(false);
       }
     };
     getMessages();
-  }, [chatId, users]);
+  }, [chatId, users, user]);
 
   const createChat = useCallback(
     async (secondId: string) => {
       const response = await postRequest(
         `${baseUrl}/chats/create-direct-chat/${secondId}`
       );
-      if (response.error) {
+      if (!response.error) {
+        if (pathname !== `/direct-message/${secondId}`) {
+          navigate(`/direct-messages/${secondId}`);
+        }
+
+        setChatId(response.chat._id);
+        await getUserChats();
+      } else {
         return console.log("Error creating chat", response);
       }
-
-      if (pathname !== `/direct-message/${secondId}`) {
-        navigate(`/direct-messages/${secondId}`);
-      }
-
-      setChatId(response.chat._id);
-      await getUserChats();
     },
     [getUserChats]
   );
 
   const manageCourseChats = useCallback(async () => {
     const response = await postRequest(`${baseUrl}/chats/manage-course-chats`);
-
-    if (response.error) {
+    if (!response.error) {
+      await getUserChats();
+    } else {
       return console.log("Error managing group chats", response);
     }
-
-    await getUserChats();
   }, [getUserChats]);
 
   useEffect(() => {
@@ -328,22 +309,49 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   }, [pathname]);
 
   const sendTextMessage = useCallback(
-    async (textMessage: string, currentChatId: string) => {
-      try {
-        const sentMessage = {
-          chatId: currentChatId,
-          sender: user?._id as string,
-          text: textMessage,
-          createdAt: new Date(),
-        };
+    async (
+      textMessage: string,
+      type: "text" | "document" | "audio" | "video" | "image",
+      currentChatId: string
+    ) => {
+      if (!textMessage) {
+        console.error("No text message");
+        return;
+      }
+      const tempMessageId = Date.now().toString();
+      const tempMessage: Message = {
+        _id: tempMessageId,
+        chatId: currentChatId,
+        sender: user?._id as string,
+        text: textMessage,
+        createdAt: new Date(),
+        sending: true,
+        error: false,
+        type: type || "text",
+      };
 
+      setMessages((prev: Message[] | null) =>
+        prev ? [...prev, tempMessage] : [tempMessage]
+      );
+
+      try {
         const response = await postRequest(
           `${baseUrl}/message/send-message`,
-          JSON.stringify(sentMessage)
+          JSON.stringify(tempMessage)
         );
 
         if (response.error) {
-          return setSendTextMessageError(response.message);
+          setSendTextMessageError(response.message);
+          setMessages((prev: Message[] | null) =>
+            prev
+              ? prev.map((msg) =>
+                  msg._id === tempMessageId
+                    ? { ...msg, sending: false, error: true }
+                    : msg
+                )
+              : null
+          );
+          return;
         }
 
         const newText =
@@ -355,18 +363,88 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           text: newText.text,
           createdAt: newText.createdAt,
           courseId: response.chat.type === "course" && response.chat.courses[0],
+          type: newText.type,
         };
 
         setNewMessage(newMessage);
         setMessages((prev: Message[] | null) =>
-          prev ? [...prev, newMessage] : [newMessage]
+          prev
+            ? prev.map((msg) => (msg._id === tempMessageId ? newMessage : msg))
+            : [newMessage]
         );
       } catch (error) {
         console.log(error);
+        setMessages((prev: Message[] | null) =>
+          prev
+            ? prev.map((msg) =>
+                msg._id === tempMessageId
+                  ? { ...msg, sending: false, error: true }
+                  : msg
+              )
+            : null
+        );
       }
     },
-    []
+    [user]
   );
+
+  const retrySendMessage = useCallback(async (message: Message) => {
+    const tempMessageId = message._id;
+    setMessages((prev: Message[] | null) =>
+      prev
+        ? prev.map((msg) =>
+            msg._id === tempMessageId
+              ? { ...msg, sending: true, error: false }
+              : msg
+          )
+        : null
+    );
+    try {
+      const response = await postRequest(
+        `${baseUrl}/message/send-message`,
+        JSON.stringify(message)
+      );
+      if (response.error) {
+        setSendTextMessageError(response.message);
+        setMessages((prev: Message[] | null) =>
+          prev
+            ? prev.map((msg) =>
+                msg._id === tempMessageId
+                  ? { ...msg, sending: false, error: true }
+                  : msg
+              )
+            : null
+        );
+        return;
+      }
+      const newText = response.chat.messages[response.chat.messages.length - 1];
+      const newMessage = {
+        chatId: response.chat._id,
+        sender: newText.sender,
+        text: newText.text,
+        createdAt: newText.createdAt,
+        courseId: response.chat.type === "course" && response.chat.courses[0],
+        type: newText.type,
+      };
+      setNewMessage(newMessage);
+      setMessages((prev: Message[] | null) =>
+        prev
+          ? prev.map((msg) => (msg._id === tempMessageId ? newMessage : msg))
+          : [newMessage]
+      );
+    } catch (error) {
+      console.log(error);
+      setMessages((prev: Message[] | null) =>
+        prev
+          ? prev.map((msg) =>
+              msg._id === tempMessageId
+                ? { ...msg, sending: false, error: true }
+                : msg
+            )
+          : null
+      );
+    }
+  }, []);
 
   const markAsRead = useCallback(
     (chatId: string, notifications: Notifications[]) => {
@@ -379,6 +457,25 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     },
     []
   );
+
+  const upload = useCallback(async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      console.log(formData);
+      const response = await fetch(`${baseUrl}/uploads`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      if (!response.ok) {
+        return console.log("Error uploading file", response);
+      }
+      return await response.json();
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
 
   const value: ChatContextProps = {
     createChat,
@@ -398,6 +495,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     sendTextMessageError,
     notifications,
     markAsRead,
+    upload,
+    retrySendMessage,
   };
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
